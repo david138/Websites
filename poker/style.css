@@ -1,0 +1,271 @@
+/* http://meyerweb.com/eric/tools/css/reset/
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, menu, nav, section {
+    display: block;
+}
+
+/* clearfix */
+
+.group:before,
+.group:after {
+    content: "";
+    display: table;
+}
+.group:after {
+    clear: both;
+}
+.group {
+    zoom: 1;
+}
+
+
+
+body {
+    line-height: 1;
+}
+ol, ul {
+    list-style: none;
+}
+blockquote, q {
+    quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+    content: '';
+    content: none;
+}
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+body {
+    font-size: 16px;
+}
+
+main {
+    max-width: 1200px;
+    border: 1px solid black;
+    margin: 20px auto;
+    width: 90%;
+    position: relative;
+
+}
+
+.game-board {
+    border: 2px solid black;
+    width: 525px;
+    height: 300px;
+    border-radius: 240px / 320px;
+    margin: 200px auto;
+    text-align: center;
+}
+
+.game-board > div {
+    display: inline-block;
+    margin-top: 100px;
+    border: 1px solid black;
+    padding: 5px;
+    vertical-align: middle;
+
+}
+
+.player {
+    border: 1px solid black;
+    width: 200px;
+    height: 150px;
+    position: absolute;
+    text-align: center;
+}
+
+.player.player1 {
+    top: 275px;
+    left: 25px;
+}
+
+.player.player4 {
+    top: 25px;
+    left: 366.66666667px;
+}
+
+.player.player3 {
+    top: 25px;
+    right: 366.6666667px;
+}
+
+.player.player2 {
+    top: 275px;
+    right: 25px;
+}
+
+.player.player5 {
+    bottom: 25px;
+    right: 366.6666667px;
+}
+
+.player.player6 {
+    bottom: 25px;
+    left: 366.6666667px;
+}
+
+.player p {
+    text-align: center;
+}
+
+.game-board .calculate {
+    margin-top: 20px;
+    clear: left;
+    width: 100%;
+    text-align: center;
+    border: none;
+}
+
+
+#createPlayer {
+    border: 2px solid black;
+    width: fit-content;
+    padding: 5px;
+}
+
+section {
+    max-width: 1400px;
+    height: 400px;
+    border: 1px solid black;
+    margin: 20px auto;
+    width: 90%;
+    position: relative;
+
+}
+
+#cards {
+    padding: 3px;
+    width: fit-content;
+    margin: 5px auto;
+    text-align: center
+}
+
+#cards .cardGroup {
+    border: 1px solid black;
+    float: left;
+    text-align: center;
+}
+
+.card {
+    height: 90px;
+    margin: 1px;
+    width: 63px;
+    padding: 0;
+    border: 1px solid black;
+    display: inline-block;
+    border-radius: 5px;
+    box-shadow: -1px 1px 1px #888888;
+    position: relative;
+    cursor: default;
+    vertical-align: middle;
+    transition: all 0.2s ease-in-out;
+    text-indent: -999999px;
+
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+.split {
+    margin: 0;
+    padding: 0;
+    height: 0;
+}
+
+.card:hover, .card:active {
+    cursor: pointer;
+}
+
+.card.selected {
+    box-shadow: -1px 1px 2px red,
+                 1px -1px 2px red,
+                -1px -1px 2px red,
+                  1px 1px 2px red;
+}
+
+.card.inPlay {
+    opacity: .1;
+    cursor: default;
+}
+
+.card .top {
+    width: 20px;
+    height: 35px;
+    position: absolute;
+    top: 1px;
+    right: 0;
+    background: url(suitSpriteH.png) no-repeat right  bottom;
+    text-align: center;
+    background-position: 1px 15px;
+    text-indent: 0;
+}
+
+.card.h .top, .card.h .bot {
+    background-position: -19px 15px;
+}
+
+.card.c .top, .card.c .bot {
+    background-position: -59px 15px;
+}
+
+.card.d .top, .card.d .bot {
+    background-position: -38px 15px;
+}
+
+.card .mid {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: 50%;
+    margin-top: -10px;
+    margin-left: -10px;
+    text-align: center;
+    font-size: 20px;
+    text-indent: 0;
+}
+
+.card .bot {
+    width: 20px;
+    height: 35px;
+    position: absolute;
+    bottom: 1px;
+    left: 0;
+    background: url(suitSpriteH.png) no-repeat right  bottom;
+    text-align: center;
+    background-position: 1px 15px;
+    transform: rotate(180deg);
+    text-indent: 0;
+}
