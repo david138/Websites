@@ -139,24 +139,6 @@ function handStrength(hand) {
 }
 
 /*
-  returns 1 if hand 1 is stronger than hand 2,
-  or 2 if hand 2 is strong than hand 1.
-  Returns -1 in case of tie.
- */
-function betterHand(h1Strength, h2Strength) {
-
-    for (var i = 0; i < h1Strength.length; i++) {
-        if (h1Strength[i] > h2Strength[i]) {
-            return 1;
-        }
-        if (h1Strength[i] < h2Strength[i]) {
-            return 2;
-        }
-    }
-    return -1;
-}
-
-/*
   given an array of cards, returns an array of
   the best hand.
  */
@@ -178,6 +160,131 @@ function bestHand (cards)  {
 
     console.log(curBest);
     return curBest;
+}
+
+function checkMatches (cards) {
+
+    order.fill(0);
+    var doublePairs = false,
+        max = 1,
+        curNum,
+        curIndex;
+
+
+    for (var i; i < cards.length; i++) {
+        curNum = cards[i].num;
+        curIndex = order[curNum];
+        curIndex ++;
+        if (curIndex >= 2) {
+            if (curIndex == 3) {
+                max = 3;
+            } else if (max ==  2) {
+                doublePairs = true;
+            } else {
+                max ++;
+            }
+        }
+    }
+    return [max, doublePairs, order];
+}
+
+function checkStraight(cards) {
+    var numbers = new Array();
+    for (i = 0; i < 5; i ++) {
+        numbers.push(hand[i].num);
+    }
+    numbers.sort(function(a, b){return a-b});
+
+
+    var straight,
+        j;
+    for (var i = 2; i != 3; i--) {
+        straight = true;
+        j = i;
+        while (straight) {
+            if (numbers[j] + 1 != numbers[j + 1] || numbers[j] != numbers[j + 1]) {
+                straight = false;
+            }
+            j ++;
+        }
+        if (straight && numbers[i] + 4 == numbers[i + 4]) {
+            return [true, numbers.slice(i, i + 5)];
+        }
+    }
+
+//TODO: MAKE STRAIGHT SEARCH BACKWARDS FROM THE BEGINNING SO THAT THE HIGHEST CARD WILL AUTOMATICALLY BE INCLUDED
+    // SEARCH DOWN TO INDEX 2, THEN INDEX 1, THEN INDEX 0. LASTLY CHECK FOR THE ACE IN THE HOLE
+}
+
+function checkFlush (cards) {
+    var curSuit = cards[0].suit,
+        curCount,
+        curIndex,
+        straightCards;
+
+    for (var i = 0; i < 3; i++) {
+        straightCards = [cards[i], 0, 0, 0, 0, 0, 0];
+        curIndex = 1;
+        curCount = 0;
+        for (var j = i + 1; j <= cards.length; j++) {
+            if (curSuit == cards[j].suit) {
+                straightCards[curIndex] = cards[j];
+                curCount ++;
+                curIndex ++;
+            }
+        }
+        if (curCount == 5) {
+            return [true, straightCards];
+        }
+        return [false];
+    }
+}
+
+function checkHand (cards, handRank) {
+
+    var outcome;
+
+    switch (handRank[0]) {
+        case 0:
+            outcome = checkMatches(cards);
+            if (outcome[0] >= 2) {
+                return false;
+            }
+
+            var beaten = false,
+                i = 1,
+                curRank;
+            while (!beaten && i < handRank.length) {
+                curRank = outcome[2].lastIndexOf(1);
+                if (curRank > handRank[i]) {
+                    return false;
+                } else if (curRank < handRank[i]) {
+                    beaten = true;
+                }
+            }
+            if (checkFlush(cards)[0]) {
+                return false;
+            }
+
+    }
+}
+
+/*
+ returns 1 if hand 1 is stronger than hand 2,
+ or 2 if hand 2 is strong than hand 1.
+ Returns -1 in case of tie.
+ */
+function betterHand(h1Strength, h2Strength) {
+
+    for (var i = 0; i < h1Strength.length; i++) {
+        if (h1Strength[i] > h2Strength[i]) {
+            return 1;
+        }
+        if (h1Strength[i] < h2Strength[i]) {
+            return 2;
+        }
+    }
+    return -1;
 }
 
 function CalculateWinPercentage (trials) {
@@ -352,7 +459,7 @@ function cardPlaced() {
 
 $(document).ready(function() {
     $(".calculate").on("click", "button", function() {
-        $('.winrate').text(CalculateWinPercentage (10000));
+        $('.winrate').text(CalculateWinPercentage (100000));
     });
 });
 
