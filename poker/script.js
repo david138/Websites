@@ -106,14 +106,14 @@ function handStrength(hand) {
     }
 
     if (order.indexOf(4) != -1) {
-        return [7, order.indexOf(4)];
+        return [7, order.indexOf(4), order.lastIndexOf(1)];
     }
 
     if (order.indexOf(3) != -1) {
         if (order.indexOf(2) != -1) {
-            return [6, order.indexOf(3)];
+            return [6, order.indexOf(3), order.indexOf(2)];
         } else {
-            return [3, order.indexOf(3)];
+            return [3, order.indexOf(3), order.lastIndexOf(1), order.indexOf(1)];
         }
     }
 
@@ -286,9 +286,9 @@ function checkHand (cards, handRank) {
                     if (outcome[1]) {
                         return false;
                     }
-                    if (outcome.indexOf(2) > handRank[1]) {
+                    if (outcome.lastIndexOf(2) > handRank[1]) {
                         return false;
-                    } else if (outcome.indexOf(2) == handRank[1]) {
+                    } else if (outcome.lastIndexOf(2) == handRank[1]) {
 
                         var beaten = false,
                             i = 2,
@@ -365,9 +365,9 @@ function checkHand (cards, handRank) {
                 if (outcome[1]) {
                     return false;
                 }
-                if (outcome[2].indexOf(3) > handRank[1]) {
+                if (outcome[2].lastIndexOf(3) > handRank[1]) {
                     return false;
-                } else if (outcome[2].indexOf(3) == handRank[1]) {
+                } else if (outcome[2].lastIndexOf(3) == handRank[1]) {
                     var beaten = false,
                         i = 2,
                         curRank = outcome[1].length;
@@ -434,9 +434,87 @@ function checkHand (cards, handRank) {
 
         case 6:
             outcome = checkMatches(cards);
-            if (outcome[0] == 4 || (outcome[0] == 3 && outcome[1])) {
+            if (outcome[0] == 4) {
                 return false;
             }
+            if (outcome[0] == 3 && outcome[1]) {
+                if (outcome[2].lastIndexOf(3) > handRank[1]) {
+                    return false;
+                } else if (outcome[2].lastIndexOf(3) == handRank[1]) {
+                    if (outcome[2].lastIndexOf(2) > handRank[2]) {
+                        return false;
+                    }
+                }
+            }
+
+            var flush = checkFlush(cards),
+                straight;
+
+            if (!flush[0]) {
+                return true;
+            } else {
+                if (straight[1] > handRank[1]) {
+                    return false;
+                }
+            }
+
+            straight = checkStraight(flush[1]);
+
+            if (straight[0]) {
+                return false;
+            }
+
+            return true;
+            break;
+
+        case 7:
+            outcome = checkMatches(cards);
+            if (outcome[0] == 4) {
+                if (outcome[2].indexOf(4) > handRank[1]) {
+                    return false;
+                } else if (outcome[2].indexOf(4) == handRank[1]) {
+                    outcome[2][outcome[2].indexOf(4)] = 0;
+                    var highestNum = outcome[2].length -1;
+                    while (outcome[2][highestNum] == 0 ) {
+                        highestNum --;
+                    }
+                    if (outcome[2][highestNum] > handRank[1]) {
+                        return false;
+                    }
+                }
+
+            }
+
+            var flush = checkFlush(cards),
+                straight;
+            if (!flush[0]) {
+                return true;
+            }
+
+            straight = checkStraight(flush[1]);
+
+            if (straight[0]) {
+                return false;
+            }
+
+            return true;
+            break;
+
+        case 8:
+            var flush = checkFlush(cards),
+                straight;
+            if (!flush[0]) {
+                return true;
+            }
+
+            straight = checkStraight(flush[1]);
+
+            if (straight[0] && straight[1] > handRank[1]) {
+                return false;
+            }
+
+            return true;
+            break;
 
     }
 }
