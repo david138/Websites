@@ -22,14 +22,6 @@ function Player() {
 
 var community = new Array(5).fill(randCard);
 
-function sumArrays(array1, array2) {
-    var total = new Array(array1.length);
-    for (var i = 0; i < array1.length; i++){
-        total.push(array1[i] + array2[i]);
-    }
-    return total;
-}
-
 /*
   Create the deck.
  */
@@ -54,176 +46,137 @@ for (var p = 0; p < players.length; p++) {
 players[0].inPlay = true;
 players[1].inPlay = true;
 
-var order = new Array(15)
-
 /*
   Returns the strength of a given hand.
  */
-function handStrength(hand) {
 
-    var straight = true;
-    var flush = true;
-    var i;
 
-    var numbers = [];
-    for (i = 0; i < 5; i ++) {
-        numbers.push(hand[i].num);
-    }
-    numbers.sort(function(a, b){return a-b});
+function calcPlayerHand(cards) {
 
-    for (i = 0; i < 3; i++) {
-        if (numbers[i] + 1 != numbers[i + 1]) {
-            straight = false;
-        }
-    }
+    var flush = checkFlush(cards),
+        straight,
+        cardNumsSorted,
+        outcome;
 
-    if (numbers[3] + 1 != numbers[4] && (numbers[0] != 2 || numbers[4] != 14)) {
-        straight = false;
-    }
+    if (flush[0]) {
+        cardNumsSorted = sortHand(flush[1]);
+        straight = checkStraightSorted(cardNumsSorted);
 
-    for (i = 0; i < 4; i++) {
-        if (hand[i].suit != hand[i + 1].suit) {
-            flush = false;
-        }
-    }
-
-    if (straight == true) {
-        if (flush == true) {
-            return [8, numbers[4]];
+        if (straight[0]) {
+            return [8, straight[1]];
         } else {
-            return [4, numbers[4]];
+            return [5].concat(cardNumsSorted);
         }
     }
 
-    if (flush == true) {
-        return [5, numbers[4], numbers[3], numbers[2], numbers[1], numbers[0]];
+    cardNumsSorted = sortHand(cards);
+    straight = checkStraightSorted(cardNumsSorted);
+
+    if (straight[0]) {
+        return [4, straight[1]];
     }
 
-    order.fill(0);
+    outcome = checkMatches(cards);
 
-    for (i = 0; i <= 4; i++) {
-        order[hand[i].num] += 1;
-    }
+    var highPair,
+        handStrength,
+        i;
 
-    if (order.indexOf(4) != -1) {
-        return [7, order.indexOf(4), order.lastIndexOf(1)];
-    }
+    switch(outcome[0]) {
+        case 1:
+            return [0].concat(cardNumsSorted.slice(0, 5));
+        case 2:
 
-    if (order.indexOf(3) != -1) {
-        if (order.indexOf(2) != -1) {
-            return [6, order.indexOf(3), order.indexOf(2)];
-        } else {
-            return [3, order.indexOf(3), order.lastIndexOf(1), order.indexOf(1)];
-        }
-    }
-
-    if (order.indexOf(2) != -1) {
-        var lowerPair = order.indexOf(2);
-        order[lowerPair] = 0;
-        if (order.indexOf(2) != -1) {
-            return [2, order.indexOf(2), lowerPair, order.indexOf(1)]
-        } else {
-            var lowest = order.indexOf(1);
-            order[lowest] = 0;
-            var lowest2 = order.indexOf(1);
-            order[lowest2] = 0;
-            var lowest3 = order.indexOf(1);
-            order[lowest3] = 0;
-            return [1, lowerPair, lowest3, lowest2, lowest];
-        }
-
-    }
-    return [0, numbers[4], numbers[3], numbers[2], numbers[1], numbers[0]];
-
-
-}
-
-function sortHand (cards) {
-    var numbers = [];
-
-    for (i = 0; i < cards.length; i ++) {
-        numbers.push(cards[i].num);
-    }
-    return numbers.sort(function(a, b){return b-a});
-}
-
-/*
-  given an array of cards, returns an array of
-  the best hand.
- */
-function bestHand (cards)  {
-    var curBest = [-2];
-
-
-    for (var i = 0; i < 6; i++) {
-        for (var j = i + 1; j < 7; j++) {
-            var hand = cards.slice(0, i).concat(cards.slice(i + 1));
-            hand = hand.slice(0, j - 1).concat(hand.slice(j));
-            var cur = handStrength(hand);
-            if (betterHand(curBest, cur) == 2) {
-                curBest = cur;
+            if (outcome[2]) {
+                return [2, outcome[1], outcome[2], outcome[3]];
+            } else {
+                highPair = outcome[1];
+                handStrength = [1, outcome[1], 0, 0, 0];
+                for (i = 2, j = 0; i < 5; i++) {
+                    cardNumsSorted[j] == highPair ? j = j + 2: null;
+                    handStrength[i] = cardNumsSorted[j];
+                    j++;
+                }
+                return handStrength;
             }
-        }
+        case 3:
+            if (straight[1]) {
+                return [6, outcome[1], outcome[2]];
+            }
+            highPair = outcome[1];
+            handStrength = [1, outcome[1], 0, 0];
+            for (i = 2, j = 0; i < 4; i++) {
+                cardNumsSorted[j] == highPair ? j = j + 3: null;
+                handStrength[i] = cardNumsSorted[j];
+                j++;
+            }
+            return handStrength;
+        case 4:
+            if (outcome[2]) {
+                return [7, outcome[1], outcome[2]];
+            }
+            return [7, outcome[1], outcome[3]];
+
     }
 
-    return curBest;
 }
 
 function checkMatches (cards) {
 
-    order.fill(0);
-    var doublePairs = false,
-        max = 1,
+    var max = 1,
         curNum,
         curIndex,
-        count = order.fill(0);
+        maxNum = 0,
+        secondPair = 0,
+        highCard = 0,
+        count = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 
     for (var i = 0; i < cards.length; i++) {
         curNum = cards[i].num;
         count[curNum] ++;
         curIndex = count[curNum];
-        if (curIndex == 2) {
-            if (max >=  2) {
-                doublePairs = true;
-            }
-        }
-        if (curIndex > max) {
+        if (maxNum == curNum) {
             max ++;
+        } else if(curIndex == 2 && secondPair) {
+            if (curNum > secondPair) {
+                secondPair = curNum;
+            }
+            if (max == 2 && curNum > maxNum) {
+                secondPair = maxNum;
+                maxNum = curNum;
+            }
+        }else if (curIndex == 2) {
+            if (max == 1) {
+                max++;
+                maxNum = curNum;
+            } else if (curNum > maxNum) {
+                secondPair = maxNum;
+                maxNum = curNum;
+            } else {
+                secondPair = curNum;
+            }
+        } else if (curIndex > 2) {
+            if (curIndex > max) {
+                if (maxNum > secondPair) {
+                    secondPair = maxNum;
+                }
+                maxNum = curNum;
+            } else if (curIndex == max) {
+                if (curNum > secondPair) {
+                    secondPair = curNum;
+                }
+                if (curNum > maxNum) {
+                    secondPair = maxNum;
+                    maxNum = curNum;
+                }
+            }
+        }
+        if (curNum != maxNum && curNum != secondPair && curNum > highCard) {
+            highCard = curNum;
         }
     }
-    return [max, doublePairs, count];
-}
-
-function checkStraight(cards) {
-    var numbers = [];
-    for (i = 0; i < cards.length; i ++) {
-        numbers.push(cards[i].num);
-    }
-    numbers.sort(function(a, b){return a-b});
-
-    if (numbers[numbers.length - 1] == 14) {
-        numbers = [1].concat(numbers);
-    }
-
-    var straight = true,
-        j;
-    for (var i = cards.length - 1; i > 3; i--) {
-        straight = true;
-        j = i;
-        while (straight && j >= 0) {
-            if (numbers[j] - 1 != numbers[j - 1] && numbers[j] != numbers[j - 1]) {
-                straight = false;
-            }
-
-            if (straight && i - j == 3) {
-                return [true, numbers[i]];
-            }
-
-            j --;
-        }
-    }
-    return [false]
+    return [max, maxNum, secondPair, highCard];
 }
 
 function checkStraightSorted(numbers) {
@@ -243,7 +196,7 @@ function checkStraightSorted(numbers) {
                 straight = false;
             }
 
-            if (straight && (numbers[ji] - numbers[j] == 4)) {
+            if (straight && (numbers[i] - numbers[j + 1] == 4)) {
                 return [true, numbers[i]];
             }
 
@@ -321,8 +274,8 @@ function pair (cards, handRank) {
             sortedNums = sortHand(cards);
             break;
         case 2:
-            var pairNum = outcome[2].lastIndexOf(2);
-            if (outcome[1] || pairNum > handRank[1]) {
+            var pairNum = outcome[1];
+            if (outcome[2] || pairNum > handRank[1]) {
                 return -1;
             }
             sortedNums = sortHand(cards);
@@ -330,7 +283,7 @@ function pair (cards, handRank) {
                 var i = 2,
                     j = 0;
                 while (villainBeat == 0 && i < handRank.length) {
-                    sortedNums[j] == pairNum ? j++ : null;
+                    sortedNums[j] == pairNum ? j = j + 2 : null;
                     if (sortedNums[j] > handRank[i]) {
                         return -1;
                     } else if (sortedNums[j] < handRank[i]) {
@@ -339,7 +292,8 @@ function pair (cards, handRank) {
                     i++;
                     j++;
                 }
-
+            } else {
+                villainBeat = 1;
             }
             break;
         default:
@@ -357,6 +311,192 @@ function pair (cards, handRank) {
     return villainBeat;
 }
 
+function doublePair(cards, handRank) {
+    var outcome = checkMatches(cards),
+        villainBeat = 0,
+        sortedNums;
+
+    switch (outcome[0]) {
+        case 1:
+            villainBeat = 1;
+            break;
+        case 2:
+            outcome[2] == 0 ? villainBeat = 1 : null;
+
+            var i = 1;
+            while (villainBeat == 0 && i < outcome.length) {
+                if (outcome[i] > handRank[i]) {
+                    return -1;
+                } else if (outcome[i] < handRank[i]) {
+                    villainBeat = 1;
+                }
+                i++
+            }
+            break;
+        default:
+            return -1;
+    }
+
+    sortedNums = sortHand(cards);
+
+    if (checkFlush(cards)[0]) {
+        return -1;
+    }
+
+    if (checkStraightSorted(sortedNums)[0]) {
+        return -1;
+    }
+
+    return villainBeat;
+}
+
+function triple(cards, handRank) {
+    var outcome = checkMatches(cards),
+        villainBeat = 0,
+        sortedNums;
+
+    switch (outcome[0]) {
+        case 1:
+        case 2:
+            sortedNums = sortHand(cards);
+            villainBeat = 1;
+            break;
+        case 3:
+            var pairNum = outcome[1];
+            if (outcome[2] || pairNum > handRank[1]) {
+                return -1;
+            }
+            sortedNums = sortHand(cards);
+            if (pairNum == handRank[1]) {
+                var i = 2,
+                    j = 0;
+                while (villainBeat == 0 && i < handRank.length) {
+                    sortedNums[j] == pairNum ? j = j + 3 : null;
+                    if (sortedNums[j] > handRank[i]) {
+                        return -1;
+                    } else if (sortedNums[j] < handRank[i]) {
+                        villainBeat = 1;
+                    }
+                    i++;
+                    j++;
+                }
+            } else {
+                villainBeat = 1;
+            }
+            break;
+        default:
+            return -1;
+    }
+
+    if (checkFlush(cards)[0]) {
+        return -1;
+    }
+
+    if (checkStraightSorted(sortedNums)[0]) {
+        return -1;
+    }
+
+    return villainBeat;
+}
+
+function straight(cards, handRank) {
+    var outcome = checkMatches(cards),
+        villainBeat = 0;
+
+    if (outcome[0] > 3 || (outcome[0] == 3 && outcome[2])) {
+        return -1
+    }
+
+    if (checkFlush(cards)[0]) {
+        return -1;
+    }
+
+    var straight = checkStraightSorted(sortHand(cards))[0];
+    if (straight[0]) {
+        if (straight[1] > handRank[2]) {
+            return -1;
+        } else if (straight[1] < handRank[2]) {
+            villainBeat = 1;
+        }
+    } else {
+        villainBeat = 1;
+    }
+
+    return villainBeat;
+}
+
+function flush(cards, handRank) {
+    var outcome = checkMatches(cards),
+        villainBeat = 0,
+        sortedNums;
+
+    if (outcome[0] > 3 || (outcome[0] == 3 && outcome[2])) {
+        return -1
+    }
+
+    var flush = checkFlush(cards);
+    if (flush[0]) {
+        sortedNums = sortHand(flush[1]);
+        var i = 1;
+        while (villainBeat == 0 && i < handRank.length) {
+            if (sortedNums[i] > handRank[i]) {
+                return -1;
+            } else if (sortedNums[j] < handRank[i]) {
+                villainBeat = 1;
+            }
+        }
+
+        if (checkStraightSorted(sortedNums)[0]) {
+            return -1;
+        }
+    } else {
+        villainBeat = 1;
+    }
+
+    return villainBeat;
+}
+
+function fullHouse (cards, handRank) {
+    var outcome = checkMatches(cards),
+        villainBeat = 0,
+        sortedNums;
+
+    if (outcome[0] == 3 && outcome[2]) {
+        var i = 1;
+        while (villainBeat == 0 && i < outcome.length) {
+            if (outcome[i] > handRank[i]) {
+                return -1;
+            } else if (outcome[i] < handRank[i]) {
+                villainBeat = 1;
+            }
+            i++
+        }
+    } else if (outcome[0] > 3 ) {
+        return -1;
+    } else {
+        villainBeat = 1;
+    }
+
+    var flush = checkFlush(cards);
+    if (flush[0]) {
+        sortedNums = sortHand(flush[1]);
+
+        if (checkStraightSorted(sortedNums)[0]) {
+            return -1;
+        }
+    }
+
+    return villainBeat;
+}
+
+function quads (cards, handRank) {
+
+}
+
+function straightFlush (cards, handRank) {
+
+}
+
 function checkHand (cards, handRank) {
 
     switch (handRank[0]) {
@@ -364,214 +504,23 @@ function checkHand (cards, handRank) {
             return highCard(cards, handRank);
         case 1:
             return pair(cards, handRank);
-
         case 2:
-            outcome = checkMatches(cards);
-            switch (outcome[0]) {
-                case 1:
-                    break;
-                case 2:
-                    if (outcome[1]) {
-                        var beaten = false,
-                            i = 1,
-                            curRank = outcome[1].length;
-                        while (!beaten && i < handRank.length -1) {
-                            curRank = outcome[2].lastIndexOf(2, curRank - 1);
-                            if (curRank > handRank[i]) {
-                                return false;
-                            } else if (curRank < handRank[i]) {
-                                beaten = true;
-                            }
-                            i++;
-                        }
-                        if (!beaten && handRank[handRank.length - 1] < outcome[2].lastIndexOf(1)) {
-                            return false;
-                        }
-                    }
-                    break;
-                default:
-                    return false;
-            }
-            if (checkFlush(cards)[0]) {
-                return false;
-            }
-
-            if (checkStraight(cards)[0]) {
-                return false;
-            }
-
-            return true;
-            break;
-
+            return doublePair(cards, handRank);
         case 3:
-            outcome = checkMatches(cards);
-            if (outcome[0] == 4 ) {
-                return false;
-            } else if (outcome[0] == 3) {
-                if (outcome[1]) {
-                    return false;
-                }
-                if (outcome[2].lastIndexOf(3) > handRank[1]) {
-                    return false;
-                } else if (outcome[2].lastIndexOf(3) == handRank[1]) {
-                    var beaten = false,
-                        i = 2,
-                        curRank = outcome[1].length;
-                    while (!beaten && i < handRank.length) {
-                        curRank = outcome[2].lastIndexOf(1, curRank - 1);
-                        if (curRank > handRank[i]) {
-                            return false;
-                        } else if (curRank < handRank[i]) {
-                            beaten = true;
-                        }
-                        i++;
-                    }
-                }
-            }
-            if (checkFlush(cards)[0]) {
-                return false;
-            }
-
-            if (checkStraight(cards)[0]) {
-                return false;
-            }
-
-            return true;
-            break;
-
+            return triple(cards, handRank);
         case 4:
-            outcome = checkMatches(cards);
-            if (outcome[0] == 4 || (outcome[0] == 3 && outcome[1])) {
-                return false;
-            }
-
-            var straight = checkStraight(cards);
-            if (straight[0] && straight[1] > handRank[1]) {
-                return false;
-            }
-
-            if (checkFlush(cards)[0]) {
-                return false;
-            }
-
-            return true;
-            break;
-
+            return straight(cards, handRank);
         case 5:
-            outcome = checkMatches(cards);
-            if (outcome[0] == 4 || (outcome[0] == 3 && outcome[1])) {
-                return false;
-            }
-
-            var flush = checkFlush(cards),
-                straight;
-            if (!flush[0]) {
-                return true;
-            }
-
-            straight = checkStraight(flush[1]);
-
-            if (straight[0] && straight[1] > handRank[1]) {
-                return false;
-            }
-
-            return true;
-            break;
-
+           return flush(cards, handRank);
         case 6:
-            outcome = checkMatches(cards);
-            if (outcome[0] == 4) {
-                return false;
-            }
-            if (outcome[0] == 3 && outcome[1]) {
-                if (outcome[2].lastIndexOf(3) > handRank[1]) {
-                    return false;
-                } else if (outcome[2].lastIndexOf(3) == handRank[1]) {
-                    if (outcome[2].lastIndexOf(2) > handRank[2]) {
-                        return false;
-                    }
-                }
-            }
-
-            var flush = checkFlush(cards),
-                straight;
-
-            if (!flush[0]) {
-                return true;
-            } else {
-                flush = sortHand(flush[1]);
-                var beaten = false,
-                    i = 1,
-                    curRank = outcome[2].length;
-                while (!beaten && i < handRank.length) {
-                    if (flush[i - 1] > handRank[i]) {
-                        return false;
-                    } else if (flush[i - 1] > handRank[i]) {
-                        beaten = true;
-                    }
-                    i++;
-                }
-
-            }
-
-            straight = checkStraight(flush[1]);
-
-            if (straight[0]) {
-                return false;
-            }
-
-            return true;
+            return fullHouse(cards, handRank);
             break;
 
         case 7:
-            outcome = checkMatches(cards);
-            if (outcome[0] == 4) {
-                if (outcome[2].indexOf(4) > handRank[1]) {
-                    return false;
-                } else if (outcome[2].indexOf(4) == handRank[1]) {
-                    outcome[2][outcome[2].indexOf(4)] = 0;
-                    var highestNum = outcome[2].length -1;
-                    while (outcome[2][highestNum] == 0 ) {
-                        highestNum --;
-                    }
-                    if (outcome[2][highestNum] > handRank[1]) {
-                        return false;
-                    }
-                }
-
-            }
-
-            var flush = checkFlush(cards),
-                straight;
-            if (!flush[0]) {
-                return true;
-            }
-
-            straight = checkStraight(flush[1]);
-
-            if (straight[0]) {
-                return false;
-            }
-
-            return true;
-            break;
+            return quads(cards, handRank);
 
         case 8:
-            var flush = checkFlush(cards),
-                straight;
-            if (!flush[0]) {
-                return true;
-            }
-
-            straight = checkStraight(flush[1]);
-
-            if (straight[0] && straight[1] > handRank[1]) {
-                return false;
-            }
-
-            return true;
-            break;
-
+            return fullHouse(cards, handRank);
     }
 }
 
@@ -616,12 +565,13 @@ function CalculateWinPercentage (trials) {
             !community[r].inPlay ? community[r] = randomCard() : null;
         }
 
-        p1HandStrength = bestHand(players[0].cards.concat(community)),
+       // p1HandStrength = checkPlayerhand(players[0].cards.concat(community)),
+            p1HandStrength = calcPlayerHand(players[0].cards.concat(community)),
             p1Wins = true;
             j = 1;
         while (p1Wins && j < playersPlaying.length) {
           outcome = checkHand(playersPlaying[j].cards.concat(community), p1HandStrength);
-      //    outcome = betterHand(p1HandStrength, bestHand(players[j].cards.concat(community)));
+   //       outcome = betterHand(p1HandStrength, bestHand(players[j].cards.concat(community)));
           outcome == 1 ? wins ++ : p1Wins = false; //7.5 s
           outcome == 0 ? ties ++ : p1Wins = false; //7.5 s
             j++;
@@ -868,3 +818,146 @@ $(document).ready(function() {
 
  return -1;
  }*/
+
+var order = new Array(15);
+
+function handStrength(hand) {
+
+    var straight = true;
+    var flush = true;
+    var i;
+
+    var numbers = [];
+    for (i = 0; i < 5; i ++) {
+        numbers.push(hand[i].num);
+    }
+    numbers.sort(function(a, b){return a-b});
+
+    for (i = 0; i < 3; i++) {
+        if (numbers[i] + 1 != numbers[i + 1]) {
+            straight = false;
+        }
+    }
+
+    if (numbers[3] + 1 != numbers[4] && (numbers[0] != 2 || numbers[4] != 14)) {
+        straight = false;
+    }
+
+    for (i = 0; i < 4; i++) {
+        if (hand[i].suit != hand[i + 1].suit) {
+            flush = false;
+        }
+    }
+
+    if (straight == true) {
+        if (flush == true) {
+            return [8, numbers[4]];
+        } else {
+            return [4, numbers[4]];
+        }
+    }
+
+    if (flush == true) {
+        return [5, numbers[4], numbers[3], numbers[2], numbers[1], numbers[0]];
+    }
+
+    order.fill(0);
+
+    for (i = 0; i <= 4; i++) {
+        order[hand[i].num] += 1;
+    }
+
+    if (order.indexOf(4) != -1) {
+        return [7, order.indexOf(4), order.lastIndexOf(1)];
+    }
+
+    if (order.indexOf(3) != -1) {
+        if (order.indexOf(2) != -1) {
+            return [6, order.indexOf(3), order.indexOf(2)];
+        } else {
+            return [3, order.indexOf(3), order.lastIndexOf(1), order.indexOf(1)];
+        }
+    }
+
+    if (order.indexOf(2) != -1) {
+        var lowerPair = order.indexOf(2);
+        order[lowerPair] = 0;
+        if (order.indexOf(2) != -1) {
+            return [2, order.indexOf(2), lowerPair, order.indexOf(1)]
+        } else {
+            var lowest = order.indexOf(1);
+            order[lowest] = 0;
+            var lowest2 = order.indexOf(1);
+            order[lowest2] = 0;
+            var lowest3 = order.indexOf(1);
+            order[lowest3] = 0;
+            return [1, lowerPair, lowest3, lowest2, lowest];
+        }
+
+    }
+    return [0, numbers[4], numbers[3], numbers[2], numbers[1], numbers[0]];
+
+
+}
+
+function sortHand (cards) {
+    var numbers = [];
+
+    for (i = 0; i < cards.length; i ++) {
+        numbers.push(cards[i].num);
+    }
+    return numbers.sort(function(a, b){return b-a});
+}
+
+/*
+ given an array of cards, returns an array of
+ the best hand.
+ */
+function bestHand (cards)  {
+    var curBest = [-2];
+
+
+    for (var i = 0; i < 6; i++) {
+        for (var j = i + 1; j < 7; j++) {
+            var hand = cards.slice(0, i).concat(cards.slice(i + 1));
+            hand = hand.slice(0, j - 1).concat(hand.slice(j));
+            var cur = handStrength(hand);
+            if (betterHand(curBest, cur) == 2) {
+                curBest = cur;
+            }
+        }
+    }
+
+    return curBest;
+}
+
+function checkStraight(cards) {
+    var numbers = [];
+    for (i = 0; i < cards.length; i ++) {
+        numbers.push(cards[i].num);
+    }
+    numbers.sort(function(a, b){return a-b});
+
+    if (numbers[numbers.length - 1] == 14) {
+        numbers = [1].concat(numbers);
+    }
+
+    var straight = true,
+        j;
+    for (var i = cards.length - 1; i > 3; i--) {
+        straight = true;
+        j = i;
+        while (straight && j >= 0) {
+            if (numbers[j] - 1 != numbers[j - 1] && numbers[j] != numbers[j - 1]) {
+                straight = false;
+            }
+
+            if (straight && i - j == 3) {
+                return [true, numbers[i]];
+            }
+
+            j --;
+        }
+    }
+    return [false]
+}
