@@ -18,6 +18,7 @@ function Player() {
     this.cards[0] = randCard;
     this.cards[1] = randCard;
     this.inPlay = false;
+    this.randomed = false;
 }
 
 var community = new Array(5).fill(randCard);
@@ -53,6 +54,7 @@ players[1].inPlay = true;
 
 function calcPlayerHand(cards) {
 
+
     var flush = checkFlush(cards),
         straight,
         cardNumsSorted,
@@ -65,7 +67,7 @@ function calcPlayerHand(cards) {
         if (straight[0]) {
             return [8, straight[1]];
         } else {
-            return [5].concat(cardNumsSorted);
+            return [5].concat(cardNumsSorted.slice(0, 5));
         }
     }
 
@@ -100,11 +102,11 @@ function calcPlayerHand(cards) {
                 return handStrength;
             }
         case 3:
-            if (straight[1]) {
+            if (outcome[2]) {
                 return [6, outcome[1], outcome[2]];
             }
             highPair = outcome[1];
-            handStrength = [1, outcome[1], 0, 0];
+            handStrength = [3, outcome[1], 0, 0];
             for (i = 2, j = 0; i < 4; i++) {
                 cardNumsSorted[j] == highPair ? j = j + 3: null;
                 handStrength[i] = cardNumsSorted[j];
@@ -112,7 +114,7 @@ function calcPlayerHand(cards) {
             }
             return handStrength;
         case 4:
-            if (outcome[2]) {
+            if (outcome[2] > outcome[3]) {
                 return [7, outcome[1], outcome[2]];
             }
             return [7, outcome[1], outcome[3]];
@@ -128,7 +130,9 @@ function checkMatches (cards) {
         curIndex,
         maxNum = 0,
         secondPair = 0,
-        highCard = 0,
+        first = 0,
+        second = 0,
+        third = 0,
         count = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 
@@ -150,6 +154,8 @@ function checkMatches (cards) {
             if (max == 1) {
                 max++;
                 maxNum = curNum;
+            } else if (max > 2) {
+                secondPair = curNum
             } else if (curNum > maxNum) {
                 secondPair = maxNum;
                 maxNum = curNum;
@@ -172,11 +178,24 @@ function checkMatches (cards) {
                 }
             }
         }
-        if (curNum != maxNum && curNum != secondPair && curNum > highCard) {
-            highCard = curNum;
+        if (curNum > first) {
+            third = second;
+            second = first;
+            first = curNum;
+        } else if (curNum > second && curNum < first) {
+            third = second;
+            second = curNum;
+        }else if (curNum > third && curNum < second) {
+            third = curNum;
         }
     }
-    return [max, maxNum, secondPair, highCard];
+    if (first != maxNum && first != secondPair) {
+        return [max, maxNum, secondPair, first];
+    } else if (second != maxNum && second != secondPair) {
+        return [max, maxNum, secondPair, second];
+    } else {
+        return [max, maxNum, secondPair, third];
+    }
 }
 
 function checkStraightSorted(numbers) {
@@ -210,20 +229,26 @@ function checkStraightSorted(numbers) {
 function checkFlush (cards) {
     var curSuit,
         curCount,
-        flushCards;
+        flushCards = [],
+        i,
+        j,
+        c;
 
-    for (var i = 0; i < 3; i++) {
-        flushCards = [cards[i]];
+    for (i = 0; i < 3; i++) {
         curCount = 1;
         curSuit = cards[i].suit;
-        for (var j = i + 1; j < cards.length; j++) {
+        for (j = i + 1; j < cards.length; j++) {
             if (curSuit == cards[j].suit) {
-                flushCards.push(cards[j]);
                 curCount ++;
             }
-        }
-        if (curCount >= 5) {
-            return [true, flushCards];
+            if (curCount >= 5) {
+                for (c = 0; c < cards.length; c++) {
+                    if (cards[c].suit == curSuit) {
+                        flushCards.push(cards[c]);
+                    }
+                }
+                return [true, flushCards];
+            }
         }
     }
     return [false];
@@ -354,7 +379,6 @@ function triple(cards, handRank) {
     var outcome = checkMatches(cards),
         villainBeat = 0,
         sortedNums;
-
     switch (outcome[0]) {
         case 1:
         case 2:
@@ -411,11 +435,11 @@ function straight(cards, handRank) {
         return -1;
     }
 
-    var straight = checkStraightSorted(sortHand(cards))[0];
+    var straight = checkStraightSorted(sortHand(cards));
     if (straight[0]) {
-        if (straight[1] > handRank[2]) {
+        if (straight[1] > handRank[1]) {
             return -1;
-        } else if (straight[1] < handRank[2]) {
+        } else if (straight[1] < handRank[1]) {
             villainBeat = 1;
         }
     } else {
@@ -437,13 +461,14 @@ function flush(cards, handRank) {
     var flush = checkFlush(cards);
     if (flush[0]) {
         sortedNums = sortHand(flush[1]);
-        var i = 1;
+        var i = 0;
         while (villainBeat == 0 && i < handRank.length) {
-            if (sortedNums[i] > handRank[i]) {
+            if (sortedNums[i] > handRank[i+ 1]) {
                 return -1;
-            } else if (sortedNums[j] < handRank[i]) {
+            } else if (sortedNums[i] < handRank[i + 1]) {
                 villainBeat = 1;
             }
+            i++;
         }
 
         if (checkStraightSorted(sortedNums)[0]) {
@@ -486,18 +511,63 @@ function fullHouse (cards, handRank) {
         }
     }
 
+    if (villainBeat == 0) {
+    }
     return villainBeat;
 }
 
 function quads (cards, handRank) {
+    var outcome = checkMatches(cards),
+        villainBeat = 0,
+        sortedNums;
+    if (outcome[0] == 4) {
+        if (outcome[1] > handRank[1]) {
+            return -1;
+        } else if (outcome[1] < handRank[1]) {
+            villainBeat = 1;
+        } else {
+            var max = Math.max(outcome[2], outcome[3]);
+            if (max > handRank[2]) {
+                return -1
+            } else if (max < handRank[2]) {
+                villainBeat = 1;
+            }
+        }
+    } else {
+        villainBeat = 1;
+    }
 
+    var flush = checkFlush(cards);
+    if (flush[0]) {
+        sortedNums = sortHand(flush[1]);
+
+        if (checkStraightSorted(sortedNums)[0]) {
+            return -1;
+        }
+    }
+
+    return villainBeat;
 }
 
 function straightFlush (cards, handRank) {
+    var flush = checkFlush(cards),
+        straight;
+    if (flush[0]) {
+        straight = checkStraightSorted(sortHand(flush[1]));
+        if (straight[0]) {
+            if (straight[1] > handRank[1]) {
+                return -1;
+            } else if (straight[1] == handRank[1]) {
+                return 0;
+            }
+        }
+    }
 
+    return 1;
 }
 
 function checkHand (cards, handRank) {
+
 
     switch (handRank[0]) {
         case 0:
@@ -514,120 +584,200 @@ function checkHand (cards, handRank) {
            return flush(cards, handRank);
         case 6:
             return fullHouse(cards, handRank);
-            break;
-
         case 7:
             return quads(cards, handRank);
-
         case 8:
-            return fullHouse(cards, handRank);
+            return straightFlush(cards, handRank);
     }
 }
 
-/*
- returns 1 if hand 1 is stronger than hand 2,
- or 2 if hand 2 is strong than hand 1.
- Returns -1 in case of tie.
- */
-function betterHand(h1Strength, h2Strength) {
-
-    for (var i = 0; i < h1Strength.length; i++) {
-        if (h1Strength[i] > h2Strength[i]) {
-            return 1;
-        }
-        if (h1Strength[i] < h2Strength[i]) {
-            return 2;
-        }
-    }
-    return 0;
-}
-
-function CalculateWinPercentage (trials) {
-    var playersPlaying = [];
-    var wins = 0,
+function calculateWinPercentage (trials) {
+    var playersPlaying = [],
+        wins = 0,
         ties = 0,
-        outcome;
-    var p1HandStrength;
-    var p1Wins;
+        outcome,
+        p1HandStrength,
+        p1Wins,
+        playerCards,
+        i,
+        r;
 
-    for (var i = 0; i < players.length; i++) {
+    for (i = 0; i < players.length; i++) {
         players[i].inPlay ? playersPlaying.push( players[i] ) : null;
     }
-    for (var i = 0; i < trials; i ++) {
+    for (i = 0; i < trials; i ++) {
 
-        for (var r = 0; r < playersPlaying.length; r++) {
+        !playersPlaying[0].cards[0].inPlay ? playersPlaying[0].cards[0] = randomCard() : null;
+        !playersPlaying[0].cards[1].inPlay ? playersPlaying[0].cards[1] = randomCard() : null;
 
-            !playersPlaying[r].cards[0].inPlay ? playersPlaying[r].cards[0] = randomCard() : null;
-            !playersPlaying[r].cards[1].inPlay ? playersPlaying[r].cards[1] = randomCard() : null;
-        }
-
-        for (var r = 0; r < community.length; r++) {
+        for (r = 0; r < community.length; r++) {
             !community[r].inPlay ? community[r] = randomCard() : null;
         }
 
-       // p1HandStrength = checkPlayerhand(players[0].cards.concat(community)),
-            p1HandStrength = calcPlayerHand(players[0].cards.concat(community)),
+     //   p1HandStrength = bestHand(players[0].cards.concat(community)),
+            p1HandStrength = calcPlayerHand(players[0].cards.concat(community));
             p1Wins = true;
             j = 1;
         while (p1Wins && j < playersPlaying.length) {
-          outcome = checkHand(playersPlaying[j].cards.concat(community), p1HandStrength);
+
+            playerCards = playersPlaying[j].cards;
+            !playerCards[0].inPlay ? playerCards[0] = randomCard() : null;
+            !playerCards[1].inPlay ? playerCards[1] = randomCard() : null;
+
+          outcome = checkHand(playerCards.concat(community), p1HandStrength);
    //       outcome = betterHand(p1HandStrength, bestHand(players[j].cards.concat(community)));
           outcome == 1 ? wins ++ : p1Wins = false; //7.5 s
           outcome == 0 ? ties ++ : p1Wins = false; //7.5 s
             j++;
+
         }
+
+        for (r = 0; r < playersPlaying.length; r++) {
+            removeRandom(playersPlaying[r].cards);
+        }
+        removeRandom(community);
 
      }
 
-    for (var r = 0; r < playersPlaying.length; r++) {
-
+    for (r = 0; r < community.length; r++) {
+        !community[r].inPlay ? community[r] = randCard : null;
+    }
+    for (r = 0; r < playersPlaying.length; r++) {
         !playersPlaying[r].cards[0].inPlay ? playersPlaying[r].cards[0] = randCard : null;
         !playersPlaying[r].cards[1].inPlay ? playersPlaying[r].cards[1] = randCard : null;
     }
 
-    for (var r = 0; r < community.length; r++) {
-        !community[r].inPlay ? community[r] = randCard : null;
-    }
+
 
     return (wins / trials * 100 + " ties: " + ties / trials * 100);
 }
 
 function randomCard () {
-    var randomCard = Math.floor(Math.random() * 52);
-    while (deck[randomCard].inPlay) {
-        var randomCard = Math.floor(Math.random() * 52);
+    var card = deck[Math.floor(Math.random() * 52)];
+    while (card.inPlay || card.randomed) {
+        card = deck[Math.floor(Math.random() * 52)];
     }
-    return deck[randomCard];
+    card.randomed = true;
+    return card;
+}
+
+function removeRandom(cards) {
+    for (var i = 0; i < cards.length; i++) {
+        cards[i].randomed = false;
+    }
 }
 
 
 
 $(document).ready(function() {
-    var i, j;
+    var $card;
+    var i, j, doubled;
+
+    var objHeight = $('main').css('height'),
+        objWidth = $('.cardGroup').css('width');
+    objHeight = objHeight.substring(0, objHeight.length - 2);
+    objWidth = objWidth.substring(0, objWidth.length - 2) * .75;
+
     for (i = 0; i < suits.length; i++) {
+        var $suitsDiv = $('<div class="cardRow"></div>');
+        doubled = false;
+
         for (j = 0; j < symbols.length; j++) {
-            var card = $('<div></div>');
-            card.addClass(suits[i]  + " card " + i + j);
-            //card.text(suits[i] + symbols[j]);
-            card.data("card", "." + i + j);
-            $("#" + suits[i]).append(card);
-            var top = $("<div>" + symbols[j] + "</div>");
-            var mid = $("<div>" + symbols[j] + "</div>");
-            var bot = $("<div>" + symbols[j] + "</div>");
+            $card = $('<div></div>');
+            $card.addClass(suits[i]  + " card " + i + j);
+            $card.data("card", "." + i + j);
+            var $top = $("<div>" + symbols[j] + "</div>");
+            var $mid = $("<div>" + symbols[j] + "</div>");
+            var $bot = $("<div>" + symbols[j] + "</div>");
 
-            top.addClass("top");
-            mid.addClass("mid");
-            bot.addClass("bot");
+            $top.addClass("top");
+            $mid.addClass("mid");
+            $bot.addClass("bot");
 
-            $(card).append(top);
-            $(card).append(mid);
-            $(card).append(bot);
-            if (j == 3 || j == 7) {
-                var split = $("<div class=\"split\"></div>");
-                $(card).after(split);
+            $card.append($top);
+            $card.append($mid);
+            $card.append($bot);
+
+            //curWidth = $card.css('width');
+
+           // curWidth = curWidth.substring(0, curWidth.length - 2);
+         //  $card.css('height', curWidth * 1.5 + "px");
+            $card.css('height', objWidth + 'px');
+            if (!doubled && objWidth * (j + 2) > objHeight) {
+             //   var split = $("<div class=\"split\"></div>");
+             //   $(card).after(split);
+                $("#" + suits[i]).append($suitsDiv);
+                $suitsDiv = $('<div class="cardRow"></div>');
+                doubled = true;
             }
+            $suitsDiv.append($card);
         }
+        $("#" + suits[i]).append($suitsDiv);
     }
+    $('.cardGroup').css('height', $('main').css('height'));
+});
+
+$(document).ready(function() {
+    $( window ).resize(function() {
+
+        var i, j, doubled, count;
+
+        var objHeight = $('main').css('height'),
+            objWidth = $('.cardGroup').css('width'),
+            curCard;
+        objHeight = objHeight.substring(0, objHeight.length - 2);
+        objWidth = objWidth.substring(0, objWidth.length - 2) * .75;
+
+        $('.cardGroup').each(function() {
+
+            count = 0;
+            doubled = false;
+
+            var $suitsDiv = $('<div class="cardRow"></div>');
+            var firstGroup = $(this).children().first();
+
+            firstGroup.children().each(function() {
+                $(this).css('height', objWidth + 'px');
+                if (!doubled && count > 6 && objWidth * (count + 2) > objHeight) {
+                    $suitsDiv.after($('<div class="cardRow"></div>'));
+                    $suitsDiv = $suitsDiv.next();
+                    doubled = true;
+                    count = 0;
+                }
+                $suitsDiv.append($(this));
+                count ++;
+            });
+
+            firstGroup.next().children().each(function () {
+                $(this).css('height', objWidth + 'px');
+                if (!doubled && count > 6 && objWidth * (count + 2) > objHeight) {
+                    $suitsDiv.after($('<div class="cardRow"></div>'));
+                    $suitsDiv = $suitsDiv.next();
+                    doubled = true;
+                    count = 0;
+                }
+                $suitsDiv.append($(this));
+                count ++;
+            });
+            $(this).empty();
+            if (doubled) {
+                $(this).append($suitsDiv.prev());
+                $(this).append($suitsDiv);
+            } else {
+                $(this).append($suitsDiv);
+                console.log(count);
+                console.log(objWidth);
+            }
+
+        });
+
+
+       // var oldDiv = $(".cardRow").contents();
+       // $(".cardRow").replaceWith(oldDiv);
+
+        $('.card').css('height', objWidth + 'px');
+
+    });
 });
 
 var cardSelect = false;
@@ -690,7 +840,7 @@ function cardPlaced() {
 
            // var removedCard = "." + old.text().substring(0, 2);
             $(".cardGroup").find(old.data("card")).removeClass("inPlay");
-            
+
             $(card).data("position", old.data("position"));
 
             old.after(card);
@@ -709,7 +859,7 @@ function cardPlaced() {
                 community[position.charAt(0)] = deck[cardIndex];
             }
 
-                
+
             playerSelect = false;
             cardSelect = false;
         }, 100);
@@ -718,7 +868,7 @@ function cardPlaced() {
 
 $(document).ready(function() {
     $(".calculate").on("click", "button", function() {
-        $('.winrate').text(CalculateWinPercentage (100000));
+        $('.winrate').text(calculateWinPercentage (100000));
     });
 });
 
@@ -907,6 +1057,24 @@ function sortHand (cards) {
         numbers.push(cards[i].num);
     }
     return numbers.sort(function(a, b){return b-a});
+}
+
+/*
+ returns 1 if hand 1 is stronger than hand 2,
+ or 2 if hand 2 is strong than hand 1.
+ Returns -1 in case of tie.
+ */
+function betterHand(h1Strength, h2Strength) {
+
+    for (var i = 0; i < h1Strength.length; i++) {
+        if (h1Strength[i] > h2Strength[i]) {
+            return 1;
+        }
+        if (h1Strength[i] < h2Strength[i]) {
+            return 2;
+        }
+    }
+    return 0;
 }
 
 /*

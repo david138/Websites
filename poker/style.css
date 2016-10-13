@@ -44,9 +44,38 @@ footer, header, menu, nav, section {
 }
 
 
+/* Grid */
+* {
+    box-sizing: border-box;
+}
+.row::after {
+    content: "";
+    clear: both;
+    display: block;
+}
+[class*="col-"] {
+    float: left;
+    padding: 15px;
+    margin: .1%;
+}
+.col-1 {width: 8.13%;}
+.col-2 {width: 16.46%;}
+.col-3 {width: 24.8%;}
+.col-4 {width: 33.13%;}
+.col-5 {width: 41.46%;}
+.col-6 {width: 49.8%;}
+.col-7 {width: 58.13%;}
+.col-8 {width: 66.46%;}
+.col-9 {width: 74.8%;}
+.col-10 {width: 83.13%;}
+.col-11 {width: 91.46%;}
+.col-12 {width: 99.8%;}
+
+
 
 body {
     line-height: 1;
+    background-color: hsla(282, 29%, 83%, 1);
 }
 ol, ul {
     list-style: none;
@@ -68,11 +97,13 @@ body {
     font-size: 16px;
 }
 
+#content {
+    width: 100%;
+    border: 2px solid black;
+}
+
 main {
-    max-width: 1200px;
     border: 1px solid black;
-    margin: 20px auto;
-    width: 90%;
     position: relative;
 
 }
@@ -152,34 +183,32 @@ main {
     padding: 5px;
 }
 
-section {
-    max-width: 1400px;
-    height: 400px;
-    border: 1px solid black;
-    margin: 20px auto;
-    width: 90%;
-    position: relative;
-
-}
-
 #cards {
-    padding: 3px;
-    width: fit-content;
-    margin: 5px auto;
-    text-align: center
+    border: 2px solid black;
+    text-align: center;
+    padding: 0;
+
 }
 
-#cards .cardGroup {
-    border: 1px solid black;
-    float: left;
+.cardGroup {
     text-align: center;
+    background-color: hsla(182, 29%, 83%, 1);
+    border-radius: 10px;
+    padding: 5px;
+}
+
+.cardRow {
+    display: inline-block;
+    width: 49%;
+    margin: 0 .5%;
+    vertical-align:top
 }
 
 .card {
-    height: 90px;
-    margin: 1px;
-    width: 63px;
+    background-color: white;
+    width: 100%;
     padding: 0;
+    margin: 1px;
     border: 1px solid black;
     display: inline-block;
     border-radius: 5px;
@@ -206,6 +235,8 @@ section {
 
 .card:hover, .card:active {
     cursor: pointer;
+    transform: scale(1.5);
+    z-index: 999;
 }
 
 .card.selected {
