@@ -30,6 +30,7 @@ var deck = new Array(52);
 
 var symbols = [2, 3, 4, 5, 6, 7, 8, 9, 10, "J", "Q", "K", "A"];
 var suits = ["h", "c", "d", "s"];
+var suitsSymbols = ["&hearts;", "&clubs;", "&diams;", "&spades;"];
 
 for (var i = 0; i < suits.length; i++) {
     for (var j = 0; j < symbols.length; j++) {
@@ -674,7 +675,7 @@ $(document).ready(function() {
     var i, j, doubled;
 
     var objHeight = $('main').css('height'),
-        objWidth = $('.cardGroup').css('width');
+        objWidth = $('.hide').css('width');
     objHeight = objHeight.substring(0, objHeight.length - 2);
     objWidth = objWidth.substring(0, objWidth.length - 2) * .75;
 
@@ -686,9 +687,9 @@ $(document).ready(function() {
             $card = $('<div></div>');
             $card.addClass(suits[i]  + " card " + i + j);
             $card.data("card", "." + i + j);
-            var $top = $("<div>" + symbols[j] + "</div>");
+            var $top = $("<div>" + symbols[j] + "<div class='symbol'>" + suitsSymbols[i] + "</div></div>");
             var $mid = $("<div>" + symbols[j] + "</div>");
-            var $bot = $("<div>" + symbols[j] + "</div>");
+            var $bot = $("<div>" + symbols[j] + "<div class='symbol'>" + suitsSymbols[i] + "</div></div>");
 
             $top.addClass("top");
             $mid.addClass("mid");
@@ -698,12 +699,8 @@ $(document).ready(function() {
             $card.append($mid);
             $card.append($bot);
 
-            //curWidth = $card.css('width');
-
-           // curWidth = curWidth.substring(0, curWidth.length - 2);
-         //  $card.css('height', curWidth * 1.5 + "px");
             $card.css('height', objWidth + 'px');
-            if (!doubled && objWidth * (j + 2) > objHeight) {
+            if (!doubled && j > 6 && (objWidth + 1) * (j + 1) + 15 > objHeight) {
              //   var split = $("<div class=\"split\"></div>");
              //   $(card).after(split);
                 $("#" + suits[i]).append($suitsDiv);
@@ -715,6 +712,9 @@ $(document).ready(function() {
         $("#" + suits[i]).append($suitsDiv);
     }
     $('.cardGroup').css('height', $('main').css('height'));
+    $('.card .mid').css('font-size', objWidth / 3 + 'px');
+    $('.card .top').css('font-size', objWidth / 6 + 'px');
+    $('.card .bot').css('font-size', objWidth / 6 + 'px');
 });
 
 $(document).ready(function() {
@@ -723,10 +723,11 @@ $(document).ready(function() {
         var i, j, doubled, count;
 
         var objHeight = $('main').css('height'),
-            objWidth = $('.cardGroup').css('width'),
+            objWidth = $('.hide').css('width'),
             curCard;
         objHeight = objHeight.substring(0, objHeight.length - 2);
         objWidth = objWidth.substring(0, objWidth.length - 2) * .75;
+
 
         $('.cardGroup').each(function() {
 
@@ -738,11 +739,10 @@ $(document).ready(function() {
 
             firstGroup.children().each(function() {
                 $(this).css('height', objWidth + 'px');
-                if (!doubled && count > 6 && objWidth * (count + 2) > objHeight) {
+                if (!doubled && count > 6 && (objWidth + 1) * (count + 1) + 15 > objHeight) {
                     $suitsDiv.after($('<div class="cardRow"></div>'));
                     $suitsDiv = $suitsDiv.next();
                     doubled = true;
-                    count = 0;
                 }
                 $suitsDiv.append($(this));
                 count ++;
@@ -750,11 +750,10 @@ $(document).ready(function() {
 
             firstGroup.next().children().each(function () {
                 $(this).css('height', objWidth + 'px');
-                if (!doubled && count > 6 && objWidth * (count + 2) > objHeight) {
+                if (!doubled && count > 6 && (objWidth + 1) * (count + 1) + 15 > objHeight) {
                     $suitsDiv.after($('<div class="cardRow"></div>'));
                     $suitsDiv = $suitsDiv.next();
                     doubled = true;
-                    count = 0;
                 }
                 $suitsDiv.append($(this));
                 count ++;
@@ -765,18 +764,22 @@ $(document).ready(function() {
                 $(this).append($suitsDiv);
             } else {
                 $(this).append($suitsDiv);
-                console.log(count);
-                console.log(objWidth);
             }
+            $('.cardGroup').css('height', $('main').css('height'));
 
         });
 
-
-       // var oldDiv = $(".cardRow").contents();
-       // $(".cardRow").replaceWith(oldDiv);
-
         $('.card').css('height', objWidth + 'px');
+        $('.card .mid').css('font-size', objWidth / 3 + 'px');
+        $('.card .top').css('font-size', objWidth / 6 + 'px');
+        $('.card .bot').css('font-size', objWidth / 6 + 'px');
 
+    });
+});
+
+$(document).ready(function() {
+    $( window ).resize(function() {
+        $('.card').filter('.mid').css('font-size', '50px');
     });
 });
 

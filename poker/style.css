@@ -55,8 +55,7 @@ footer, header, menu, nav, section {
 }
 [class*="col-"] {
     float: left;
-    padding: 15px;
-    margin: .1%;
+    margin: 0 .1%;
 }
 .col-1 {width: 8.13%;}
 .col-2 {width: 16.46%;}
@@ -71,11 +70,15 @@ footer, header, menu, nav, section {
 .col-11 {width: 91.46%;}
 .col-12 {width: 99.8%;}
 
-
+html {
+    height: 100%;
+}
 
 body {
     line-height: 1;
-    background-color: hsla(282, 29%, 83%, 1);
+    background: url(brillant/brillant.png) repeat;
+    background-color: white;
+    height: 100%;
 }
 ol, ul {
     list-style: none;
@@ -99,22 +102,29 @@ body {
 
 #content {
     width: 100%;
-    border: 2px solid black;
+    height: 100%;
 }
 
 main {
-    border: 1px solid black;
     position: relative;
+    height: 90%;
+    padding: 0;
+    background-color: hsl(330, 6%, 93%);
+    border-radius: 10px;
+    border: 1px solid hsl(0, 0%, 79%);
 
 }
 
 .game-board {
+    position: absolute;
     border: 2px solid black;
-    width: 525px;
-    height: 300px;
+    width: 60%;
+    height: 40%;
     border-radius: 240px / 320px;
-    margin: 200px auto;
+    left: 20%;
+    top: 30%;
     text-align: center;
+    background: url(pool_table/pool_table.png) repeat;
 }
 
 .game-board > div {
@@ -127,41 +137,44 @@ main {
 }
 
 .player {
-    border: 1px solid black;
-    width: 200px;
-    height: 150px;
+    width: 15%;
+    height: 11.25%;
     position: absolute;
     text-align: center;
+    background-color: hsl(330, 6%, 85%);/*hsla(250, 100%, 87.5%, 1);*/
+    border-radius: 10px;
+    border: 1px solid hsl(0, 0%, 79%);
 }
 
 .player.player1 {
-    top: 275px;
-    left: 25px;
+    top: 44.375%;;
+    left: 3%;
+    background-color: hsla(11, 100%, 87.5%, 1);
 }
 
 .player.player4 {
-    top: 25px;
-    left: 366.66666667px;
+    top: 16%;
+    right: 30%;
 }
 
 .player.player3 {
-    top: 25px;
-    right: 366.6666667px;
+    top: 16%;
+    left: 30%;
 }
 
 .player.player2 {
-    top: 275px;
-    right: 25px;
+    top: 44.375%;
+    right: 3%;
 }
 
 .player.player5 {
-    bottom: 25px;
-    right: 366.6666667px;
+    bottom: 16%;
+    left: 30%;
 }
 
 .player.player6 {
-    bottom: 25px;
-    left: 366.6666667px;
+    bottom: 16%;
+    right: 30%;
 }
 
 .player p {
@@ -183,25 +196,20 @@ main {
     padding: 5px;
 }
 
-#cards {
-    border: 2px solid black;
-    text-align: center;
-    padding: 0;
-
-}
-
 .cardGroup {
     text-align: center;
-    background-color: hsla(182, 29%, 83%, 1);
+    background-color: hsl(330, 6%, 93%);
     border-radius: 10px;
     padding: 5px;
+    border: 1px solid hsl(0, 0%, 79%);
 }
 
 .cardRow {
     display: inline-block;
     width: 49%;
     margin: 0 .5%;
-    vertical-align:top
+    vertical-align:top;
+    padding: 0;
 }
 
 .card {
@@ -212,12 +220,12 @@ main {
     border: 1px solid black;
     display: inline-block;
     border-radius: 5px;
-    box-shadow: -1px 1px 1px #888888;
     position: relative;
     cursor: default;
     vertical-align: middle;
-    transition: all 0.2s ease-in-out;
+    transition: all 0.1s ease-in-out;
     text-indent: -999999px;
+    font-size: 100%;
 
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -225,6 +233,9 @@ main {
     -ms-user-select: none;
     -o-user-select: none;
     user-select: none;
+
+    -webkit-backface-visibility: hidden;
+    -webkit-transform: translateZ(0) scale(1.0, 1.0);
 }
 
 .split {
@@ -235,68 +246,71 @@ main {
 
 .card:hover, .card:active {
     cursor: pointer;
-    transform: scale(1.5);
+    transform: scale(1.3);
     z-index: 999;
 }
 
 .card.selected {
-    box-shadow: -1px 1px 2px red,
-                 1px -1px 2px red,
-                -1px -1px 2px red,
-                  1px 1px 2px red;
+    transform: scale(1.3);
+    z-index: 999;
 }
 
 .card.inPlay {
     opacity: .1;
     cursor: default;
+    transform: scale(1);
 }
 
 .card .top {
-    width: 20px;
-    height: 35px;
+    width: 35%;
+    height: 33.33333%;
     position: absolute;
-    top: 1px;
-    right: 0;
-    background: url(suitSpriteH.png) no-repeat right  bottom;
+    top: 2%;
+    right: 2%;
     text-align: center;
-    background-position: 1px 15px;
     text-indent: 0;
 }
 
-.card.h .top, .card.h .bot {
-    background-position: -19px 15px;
+.card .symbol {
+    position: absolute;
+    height: 60%;
+    width: 100%;
+    text-align: center;
 }
 
-.card.c .top, .card.c .bot {
-    background-position: -59px 15px;
+.card.h .top .symbol, .card.h .bot .symbol,
+.card.d .top .symbol, .card.d .bot .symbol {
+    color: red;
 }
 
-.card.d .top, .card.d .bot {
-    background-position: -38px 15px;
+.card.c .top .symbol, .card.c .bot .symbol {
+    background-position: 95% 102%;
+}
+
+.card.d .top .symbol, .card.d .bot .symbol {
+    background-position: 62% 102%;
 }
 
 .card .mid {
     position: absolute;
-    width: 20px;
-    height: 20px;
-    top: 50%;
-    left: 50%;
-    margin-top: -10px;
-    margin-left: -10px;
+    width: 100%;
+    top: 33.05%;
     text-align: center;
-    font-size: 20px;
+    vertical-align: middle;
     text-indent: 0;
 }
 
 .card .bot {
-    width: 20px;
-    height: 35px;
+    width: 35%;
+    height: 33.333333%;
     position: absolute;
-    bottom: 1px;
-    left: 0;
-    background: url(suitSpriteH.png) no-repeat right  bottom;
+    bottom: 2%;
+    left: 2%;
     text-align: center;
-    background-position: 1px 15px;
     transform: rotate(180deg);
     text-indent: 0;
+}
+
+.hide {
+    visibility: hidden;
 }
