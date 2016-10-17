@@ -119,61 +119,68 @@ main {
     position: absolute;
     border: 2px solid black;
     width: 60%;
-    height: 40%;
+    height: 30%;
     border-radius: 240px / 320px;
     left: 20%;
-    top: 30%;
+    top: 35%;
     text-align: center;
     background: url(pool_table/pool_table.png) repeat;
+    vertical-align: middle;
 }
 
+
 .game-board > div {
+    position: absolute;
+    top: 20%;
+    width: 100%;
+}
+
+.game-board > div > div  {
     display: inline-block;
-    margin-top: 100px;
     border: 1px solid black;
     padding: 5px;
-    vertical-align: middle;
 
 }
 
 .player {
-    width: 15%;
-    height: 11.25%;
+    padding: 5px;
     position: absolute;
     text-align: center;
     background-color: hsl(330, 6%, 85%);/*hsla(250, 100%, 87.5%, 1);*/
     border-radius: 10px;
     border: 1px solid hsl(0, 0%, 79%);
+    vertical-align: bottom;
 }
 
 .player.player1 {
-    top: 44.375%;;
-    left: 3%;
+    top: 50%;
+    transform: translate(0, -50%);
+    right: 82%;
     background-color: hsla(11, 100%, 87.5%, 1);
 }
 
 .player.player4 {
-    top: 16%;
+    bottom: 77%;
     right: 30%;
 }
 
 .player.player3 {
-    top: 16%;
+    bottom: 77%;
     left: 30%;
 }
 
 .player.player2 {
-    top: 44.375%;
-    right: 3%;
+    top: 42.5%;
+    left: 82%;
 }
 
 .player.player5 {
-    bottom: 16%;
+    top: 77%;
     left: 30%;
 }
 
 .player.player6 {
-    bottom: 16%;
+    top: 77%;
     right: 30%;
 }
 
@@ -181,12 +188,11 @@ main {
     text-align: center;
 }
 
-.game-board .calculate {
-    margin-top: 20px;
-    clear: left;
-    width: 100%;
+.game-board div.calculate {
+    position: absolute;
     text-align: center;
     border: none;
+    top: 80%;
 }
 
 

@@ -208,7 +208,7 @@ function checkStraightSorted(numbers) {
 
     var straight,
         j;
-    for (var i = 0; i < 3; i++) {
+    for (var i = 0; i < numbers.length - 4; i++) {
         straight = true;
         j = i;
         while (straight && j < numbers.length - 1) {
@@ -672,7 +672,7 @@ function removeRandom(cards) {
 
 $(document).ready(function() {
     var $card;
-    var i, j, doubled;
+    var i, j, doubled, container;
 
     var objHeight = $('main').css('height'),
         objWidth = $('.hide').css('width');
@@ -682,6 +682,7 @@ $(document).ready(function() {
     for (i = 0; i < suits.length; i++) {
         var $suitsDiv = $('<div class="cardRow"></div>');
         doubled = false;
+        container = 0;
 
         for (j = 0; j < symbols.length; j++) {
             $card = $('<div></div>');
@@ -700,9 +701,9 @@ $(document).ready(function() {
             $card.append($bot);
 
             $card.css('height', objWidth + 'px');
-            if (!doubled && j > 6 && (objWidth + 1) * (j + 1) + 15 > objHeight) {
-             //   var split = $("<div class=\"split\"></div>");
-             //   $(card).after(split);
+            container = container + objWidth + 3.25;
+
+            if (!doubled && j > 6 && container > objHeight) {
                 $("#" + suits[i]).append($suitsDiv);
                 $suitsDiv = $('<div class="cardRow"></div>');
                 doubled = true;
@@ -715,12 +716,16 @@ $(document).ready(function() {
     $('.card .mid').css('font-size', objWidth / 3 + 'px');
     $('.card .top').css('font-size', objWidth / 6 + 'px');
     $('.card .bot').css('font-size', objWidth / 6 + 'px');
+
+    $('main .card').css('height', $('.cardRow .card').css('height'));
+    $('main .card').css('width', $('.cardRow .card').css('width'));
+
 });
 
 $(document).ready(function() {
     $( window ).resize(function() {
 
-        var i, j, doubled, count;
+        var i, j, doubled, count, container;
 
         var objHeight = $('main').css('height'),
             objWidth = $('.hide').css('width'),
@@ -733,13 +738,16 @@ $(document).ready(function() {
 
             count = 0;
             doubled = false;
+            container = 0;
 
             var $suitsDiv = $('<div class="cardRow"></div>');
             var firstGroup = $(this).children().first();
 
             firstGroup.children().each(function() {
                 $(this).css('height', objWidth + 'px');
-                if (!doubled && count > 6 && (objWidth + 1) * (count + 1) + 15 > objHeight) {
+                container = container + objWidth + 3.25;
+
+                if (!doubled && count > 6 && container > objHeight) {
                     $suitsDiv.after($('<div class="cardRow"></div>'));
                     $suitsDiv = $suitsDiv.next();
                     doubled = true;
@@ -750,7 +758,9 @@ $(document).ready(function() {
 
             firstGroup.next().children().each(function () {
                 $(this).css('height', objWidth + 'px');
-                if (!doubled && count > 6 && (objWidth + 1) * (count + 1) + 15 > objHeight) {
+                container = container + objWidth + 3.25;
+
+                if (!doubled && count > 6 && container > objHeight) {
                     $suitsDiv.after($('<div class="cardRow"></div>'));
                     $suitsDiv = $suitsDiv.next();
                     doubled = true;
@@ -773,6 +783,9 @@ $(document).ready(function() {
         $('.card .mid').css('font-size', objWidth / 3 + 'px');
         $('.card .top').css('font-size', objWidth / 6 + 'px');
         $('.card .bot').css('font-size', objWidth / 6 + 'px');
+
+        $('main .card').css('height', $('.cardRow .card').css('height'));
+        $('main .card').css('width', $('.cardRow .card').css('width'));
 
     });
 });
