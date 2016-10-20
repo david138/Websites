@@ -115,6 +115,33 @@ main {
 
 }
 
+.button {
+    position: absolute;
+    text-align: center;
+    border: none;
+    background-color: hsl(221, 100%, 61%);
+    border: 3px solid hsl(221, 100%, 61%);
+    border-radius: 10px;
+    transition: border-color 5s ease;
+    transition: background-color .2s ease;
+}
+
+.button:hover {
+    background-color: hsl(218, 100%, 61%);
+    border-color: hsl(218, 100%, 61%);
+    cursor: pointer;
+}
+
+.button:active {
+    border-color: hsl(223, 100%, 61%);
+    outline: 0;
+    border-width: 5px;
+}
+
+.button:focus {
+    outline: 0;
+}
+
 .game-board {
     position: absolute;
     border: 2px solid black;
@@ -152,6 +179,18 @@ main {
     vertical-align: bottom;
 }
 
+.player3 .card, .player4 .card, .player5 .card, .player6 .card {
+    visibility: hidden;
+}
+
+.add-player {
+    width: 95%;
+    left: 2.55%;
+    top: 25%;
+    height: 50%;
+
+}
+
 .player.player1 {
     top: 50%;
     transform: translate(0, -50%);
@@ -160,12 +199,12 @@ main {
 }
 
 .player.player4 {
-    bottom: 77%;
+    bottom: 67%;
     right: 30%;
 }
 
 .player.player3 {
-    bottom: 77%;
+    bottom: 67%;
     left: 30%;
 }
 
@@ -175,12 +214,12 @@ main {
 }
 
 .player.player5 {
-    top: 77%;
+    top: 67%;
     left: 30%;
 }
 
 .player.player6 {
-    top: 77%;
+    top: 67%;
     right: 30%;
 }
 
@@ -188,11 +227,11 @@ main {
     text-align: center;
 }
 
-.game-board div.calculate {
-    position: absolute;
-    text-align: center;
-    border: none;
-    top: 80%;
+.game-board .calculate {
+    top: 70%;
+    height: 20%;
+    width: 50%;
+    left: 25%;
 }
 
 
@@ -232,6 +271,7 @@ main {
     transition: all 0.1s ease-in-out;
     text-indent: -999999px;
     font-size: 100%;
+    overflow: visible;
 
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -258,13 +298,23 @@ main {
 
 .card.selected {
     transform: scale(1.3);
-    z-index: 999;
+    z-index: 99;
 }
 
 .card.inPlay {
     opacity: .1;
     cursor: default;
     transform: scale(1);
+}
+
+.card .remove {
+    position: absolute;
+    right: 0;
+    bottom: 100%;
+    color: white;
+    background-color: red;
+    text-indent: 0;
+    border: 1px solid black;
 }
 
 .card .top {

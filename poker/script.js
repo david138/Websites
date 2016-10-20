@@ -688,14 +688,18 @@ $(document).ready(function() {
             $card = $('<div></div>');
             $card.addClass(suits[i]  + " card " + i + j);
             $card.data("card", "." + i + j);
+
+            var $remove = $("<div> 	&#x2716; </div>");
             var $top = $("<div>" + symbols[j] + "<div class='symbol'>" + suitsSymbols[i] + "</div></div>");
             var $mid = $("<div>" + symbols[j] + "</div>");
             var $bot = $("<div>" + symbols[j] + "<div class='symbol'>" + suitsSymbols[i] + "</div></div>");
 
+            $remove.addClass("remove");
             $top.addClass("top");
             $mid.addClass("mid");
             $bot.addClass("bot");
 
+            $card.append($remove);
             $card.append($top);
             $card.append($mid);
             $card.append($bot);
@@ -713,6 +717,8 @@ $(document).ready(function() {
         $("#" + suits[i]).append($suitsDiv);
     }
     $('.cardGroup').css('height', $('main').css('height'));
+    $('.card .remove').css('font-size', objWidth / 8 + 'px');
+    $('.card .remove').css('visibility', 'hidden');
     $('.card .mid').css('font-size', objWidth / 3 + 'px');
     $('.card .top').css('font-size', objWidth / 6 + 'px');
     $('.card .bot').css('font-size', objWidth / 6 + 'px');
@@ -780,6 +786,7 @@ $(document).ready(function() {
         });
 
         $('.card').css('height', objWidth + 'px');
+        $('.card .remove').css('font-size', objWidth / 8 + 'px');
         $('.card .mid').css('font-size', objWidth / 3 + 'px');
         $('.card .top').css('font-size', objWidth / 6 + 'px');
         $('.card .bot').css('font-size', objWidth / 6 + 'px');
@@ -883,8 +890,16 @@ function cardPlaced() {
 }
 
 $(document).ready(function() {
-    $(".calculate").on("click", "button", function() {
+    $(".calculate").on("click", function() {
         $('.winrate').text(calculateWinPercentage (100000));
+    });
+});
+
+$(document).ready(function() {
+    $(".add-player").on("click", function() {
+        $(this).css("visibility", "hidden");
+        $(this).parent().find(".card").css("visibility", "visible");
+        players[$(this).parent().data("player")].inPlay = true;
     });
 });
 
