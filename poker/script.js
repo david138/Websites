@@ -687,9 +687,9 @@ $(document).ready(function() {
         for (j = 0; j < symbols.length; j++) {
             $card = $('<div></div>');
             $card.addClass(suits[i]  + " card " + i + j);
-            $card.data("card", "." + i + j);
+            $card.data("card", "." + i.toString() + j.toString());
 
-            var $remove = $("<div> 	&#x2716; </div>");
+            var $remove = $("<div> &#x2716; </div>");
             var $top = $("<div>" + symbols[j] + "<div class='symbol'>" + suitsSymbols[i] + "</div></div>");
             var $mid = $("<div>" + symbols[j] + "</div>");
             var $bot = $("<div>" + symbols[j] + "<div class='symbol'>" + suitsSymbols[i] + "</div></div>");
@@ -704,6 +704,7 @@ $(document).ready(function() {
             $card.append($mid);
             $card.append($bot);
 
+            $card.css('width', '100%');
             $card.css('height', objWidth + 'px');
             container = container + objWidth + 3.25;
 
@@ -725,6 +726,8 @@ $(document).ready(function() {
 
     $('main .card').css('height', $('.cardRow .card').css('height'));
     $('main .card').css('width', $('.cardRow .card').css('width'));
+
+    $('main .removePlayer').css('font-size', objWidth / 8 + 'px');
 
 });
 
@@ -794,24 +797,29 @@ $(document).ready(function() {
         $('main .card').css('height', $('.cardRow .card').css('height'));
         $('main .card').css('width', $('.cardRow .card').css('width'));
 
+        $('main .removePlayer').css('font-size', objWidth / 8 + 'px');
+
     });
 });
 
-$(document).ready(function() {
-    $( window ).resize(function() {
-        $('.card').filter('.mid').css('font-size', '50px');
-    });
-});
-
-var cardSelect = false;
-var playerSelect = false;
+var cardSelect = false,
+    playerSelect = false;
 
 $(document).ready(function() {
     $(".cardGroup").on("click", ".card:not(.inPlay)", function() {
         cardSelect = true;
         $(".cardGroup").find(".selected").removeClass("selected");
         $(this).addClass("selected");
-        cardPlaced();
+        if (playerSelect) {
+            var card = $(this);
+            var position = $("main").find(".selected");
+            if (position.data("card") != null) {
+                removeCard($(".cardGroup").find(position.data("card")), position);
+            }
+            addCard(card, position);
+            cardSelect = false;
+            playerSelect = false;
+        }
     });
 });
 
@@ -823,11 +831,38 @@ $(document).ready(function() {
 });
 
 $(document).ready(function() {
-    $("main").on("click", ".card", function() {
-        playerSelect = true;
-        $("main").find(".selected").removeClass("selected");
-        $(this).addClass("selected");
-        cardPlaced();
+    $("main").on("click", ".card:not(.selected)", function() {
+
+        if (playerSelect && $(this).data('card') != null && $("main").find("selected") != null) {
+            var prevPosition =  $("main").find(".selected");
+            var prevCard = $('.cardRow').find(prevPosition.data('card'));
+
+            var position = $(this);
+            var card = $('.cardRow').find(position.data('card'));
+
+            removeCard(card, position);
+
+            removeCard(prevCard, prevPosition);
+
+            addCard(card, prevPosition);
+            addCard(prevCard, position);
+
+            playerSelect = false;
+
+        } else {
+            playerSelect = true;
+            $("main").find(".selected").removeClass("selected");
+            $(this).addClass("selected");
+            if (cardSelect) {
+                var position = $(this);
+                if ($(this).data("card") != null) {
+                    removeCard($(".cardGroup").find($(this).data("card")), position);
+                }
+                addCard($(".cardGroup").find(".selected"), position);
+                cardSelect = false;
+                playerSelect = false;
+            }
+        }
     });
 });
 
@@ -838,54 +873,61 @@ $(document).ready(function() {
     });
 });
 
+function addCard(card, position) {
 
-function cardPlaced() {
-    if (playerSelect && cardSelect) {
-        setTimeout(function() {
+    var inPlay = card.data("card"); //information of new card
+    var cardIndex = parseInt(inPlay.charAt(1) * 13) + parseInt(inPlay.substring(2)); // Index of new card in cards array
+    var positionData = position.data("position");
 
-            var selected = $(".cardGroup").find(".selected");
-            var old = $("main").find(".selected");
+    deck[cardIndex].inPlay = true;
 
-            var inPlay = selected.data("card");
-            var outPlay = old.data("card");
+    card.removeClass("selected");
+    var cardClone = card.clone(true);
+    card.addClass("inPlay");
+    cardClone.css('width', $('.cardRow .card').css('width'));
+    cardClone.find('.remove').css('visibility', 'visible');
 
-            var cardIndex = parseInt(inPlay.charAt(1) * 13) + parseInt(inPlay.substring(2));
+    cardClone.data("position", positionData);
 
-            if (outPlay != null) {
-                deck[parseInt(outPlay.charAt(1) * 13) + parseInt(outPlay.substring(2))].inPlay = false;
-            }
-            deck[cardIndex].inPlay = true;
-
-            var card = selected.clone(true);
-            selected.addClass("inPlay");
-            $(card).removeClass("selected");
-            selected.removeClass("selected");
-
-           // var removedCard = "." + old.text().substring(0, 2);
-            $(".cardGroup").find(old.data("card")).removeClass("inPlay");
-
-            $(card).data("position", old.data("position"));
-
-            old.after(card);
-            old.remove();
+    position.replaceWith(cardClone);
 
 
+    console.log(cardIndex);
+    console.log(inPlay);
 
-            var placement;
-            var position = $(card).data("position");
-
-
-            if (position.substring(2) == "player") {
-
-                players[position.charAt(0)].cards[position.charAt(1)] = deck[cardIndex];
-            } else {
-                community[position.charAt(0)] = deck[cardIndex];
-            }
+    if (positionData.substring(2) == "player") {
+        players[positionData.charAt(0)].cards[positionData.charAt(1)] = deck[cardIndex];
+    } else {
+        community[positionData.charAt(0)] = deck[cardIndex];
+    }
 
 
-            playerSelect = false;
-            cardSelect = false;
-        }, 100);
+    //position.css('width', $('.cardRow .card').css('width'));
+    cardClone.css('visibility', 'visible');
+}
+
+function removeCard(card, position) {
+
+    position.removeData("card");
+
+    position.removeClass();
+    position.addClass("card");
+
+    position.empty();
+
+
+    card.removeClass("inPlay");
+
+    var cardData = card.data("card"), //information of new card
+        cardIndex = parseInt(cardData.charAt(1) * 13) + parseInt(cardData.substring(2)),
+        positionData = position.data("position");
+
+    deck[cardIndex].inPlay = false;
+
+    if (positionData.substring(2) == "player") {
+        players[positionData.charAt(0)].cards[positionData.charAt(1)] = randCard;
+    } else {
+        community[positionData.charAt(0)] = randCard;
     }
 }
 
@@ -898,10 +940,92 @@ $(document).ready(function() {
 $(document).ready(function() {
     $(".add-player").on("click", function() {
         $(this).css("visibility", "hidden");
-        $(this).parent().find(".card").css("visibility", "visible");
-        players[$(this).parent().data("player")].inPlay = true;
+        var player = $(this).parent();
+        player.find(".card").css("visibility", "visible");
+        player.find('.removePlayer').css("visibility", "visible");
+        players[player.data("player")].inPlay = true;
     });
 });
+
+$(document).ready(function() {
+    $(".remove").on("click", function() {
+        var position = $(this).parent();
+        if (position.hasClass('selected')) {
+            playerSelect = false;
+        }
+        removeCard($(".cardGroup").find(position.data("card")), position);
+
+    });
+});
+
+$(document).ready(function() {
+    $(".removePlayer").on("click", function() {
+        $(this).css('visibility', 'hidden');
+        var player = $(this).parent();
+        player.find('input').css('visibility', 'visible');
+        if (player.find('.card').hasClass('selected')) {
+            playerSelect = false;
+        }
+        player.find(".card").each(function() {
+            $(this).removeClass('selected');
+            if ($(this).data('card') != null) {
+                removeCard($(".cardGroup").find($(this).data("card")), $(this));
+            }
+            $(this).css('visibility', 'hidden');
+        });
+
+    });
+});
+
+/*function cardPlaced() {
+ if (playerSelect && cardSelect) {
+
+ var selected = $(".cardGroup").find(".selected"); // Card to be put in play
+ var old = $("main").find(".selected"); // Position of new card
+
+ var inPlay = selected.data("card"); //information of new card
+ var outPlay = old.data("card"); //information of old card, if exists
+
+ var cardIndex = parseInt(inPlay.charAt(1) * 13 + inPlay.charAt(2)); // Index of new card in cards array
+
+ if (outPlay != null) {
+ deck[parseInt(outPlay.charAt(1) * 13) + parseInt(outPlay.substring(2))].inPlay = false;
+ }
+ deck[cardIndex].inPlay = true;
+
+ var card = selected.clone(true);
+ selected.addClass("inPlay");
+ $(card).removeClass("selected");
+ selected.removeClass("selected");
+
+ // var removedCard = "." + old.text().substring(0, 2);
+ $(".cardGroup").find(old.data("card")).removeClass("inPlay");
+
+ $(card).data("position", old.data("position"));
+
+ old.after(card);
+ old.remove();
+
+
+
+ var placement;
+ var position = $(card).data("position");
+
+
+ if (position.substring(2) == "player") {
+
+ players[position.charAt(0)].cards[position.charAt(1)] = deck[cardIndex];
+ } else {
+ community[position.charAt(0)] = deck[cardIndex];
+ }
+
+
+ playerSelect = false;
+ cardSelect = false;
+ }
+ }*/
+
+
 
 /*function playerCalc(curPlayer) {
 
