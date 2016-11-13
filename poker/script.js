@@ -24,7 +24,7 @@ function Player() {
 var community = new Array(5).fill(randCard);
 
 /*
-  Create the deck.
+ Create the deck.
  */
 var deck = new Array(52);
 
@@ -49,7 +49,7 @@ players[0].inPlay = true;
 players[1].inPlay = true;
 
 /*
-  Returns the strength of a given hand.
+ Returns the strength of a given hand.
  */
 
 
@@ -582,7 +582,7 @@ function checkHand (cards, handRank) {
         case 4:
             return straight(cards, handRank);
         case 5:
-           return flush(cards, handRank);
+            return flush(cards, handRank);
         case 6:
             return fullHouse(cards, handRank);
         case 7:
@@ -599,6 +599,7 @@ function calculateWinPercentage (trials) {
         outcome,
         p1HandStrength,
         p1Wins,
+        p1Ties,
         playerCards,
         i,
         r;
@@ -615,22 +616,33 @@ function calculateWinPercentage (trials) {
             !community[r].inPlay ? community[r] = randomCard() : null;
         }
 
-     //   p1HandStrength = bestHand(players[0].cards.concat(community)),
-            p1HandStrength = calcPlayerHand(players[0].cards.concat(community));
-            p1Wins = true;
-            j = 1;
+        //   p1HandStrength = bestHand(players[0].cards.concat(community)),
+        p1HandStrength = calcPlayerHand(players[0].cards.concat(community));
+        p1Wins = true;
+        p1Ties = false;
+        j = 1;
         while (p1Wins && j < playersPlaying.length) {
 
             playerCards = playersPlaying[j].cards;
             !playerCards[0].inPlay ? playerCards[0] = randomCard() : null;
             !playerCards[1].inPlay ? playerCards[1] = randomCard() : null;
 
-          outcome = checkHand(playerCards.concat(community), p1HandStrength);
-   //       outcome = betterHand(p1HandStrength, bestHand(players[j].cards.concat(community)));
-          outcome == 1 ? wins ++ : p1Wins = false; //7.5 s
-          outcome == 0 ? ties ++ : p1Wins = false; //7.5 s
+            switch (checkHand(playerCards.concat(community), p1HandStrength)) {
+                case 0:
+                    p1Ties = true;
+                    break;
+                case -1:
+                    p1Wins = false;
+            }
             j++;
 
+        }
+        if (p1Wins) {
+            if (p1Ties) {
+                ties ++;
+            } else {
+                wins ++;
+            }
         }
 
         for (r = 0; r < playersPlaying.length; r++) {
@@ -638,7 +650,7 @@ function calculateWinPercentage (trials) {
         }
         removeRandom(community);
 
-     }
+    }
 
     for (r = 0; r < community.length; r++) {
         !community[r].inPlay ? community[r] = randCard : null;
@@ -650,7 +662,7 @@ function calculateWinPercentage (trials) {
 
 
 
-    return (wins / trials * 100 + " ties: " + ties / trials * 100);
+    return ([Math.round(wins / trials * 100), Math.round(ties / trials * 100)]);
 }
 
 function randomCard () {
@@ -729,6 +741,17 @@ $(document).ready(function() {
 
     $('main .removePlayer').css('font-size', objWidth / 8 + 'px');
 
+    $('header .logo').css('width', $('header .logo').css('height'));
+    $('header .logo .card').css('width', '47%');
+    $('header .logo .card').css('height', '94%');
+
+    var logoWidth = $('header .logo .card').css('width');
+    logoWidth = logoWidth.substring(0, logoWidth.length - 2);
+
+    $('header .card .mid').css('font-size', logoWidth / 1.5 + 'px');
+    $('header .card .top').css('font-size', logoWidth / 3 + 'px');
+    $('header .card .bot').css('font-size', logoWidth / 3 + 'px');
+
 });
 
 $(document).ready(function() {
@@ -799,6 +822,17 @@ $(document).ready(function() {
 
         $('main .removePlayer').css('font-size', objWidth / 8 + 'px');
 
+        $('header .logo').css('width', $('header .logo').css('height'));
+        $('header .logo .card').css('width', '47%');
+        $('header .logo .card').css('height', '94%');
+
+        var logoWidth = $('header .logo .card').css('width');
+        logoWidth = logoWidth.substring(0, logoWidth.length - 2);
+
+        $('header .card .mid').css('font-size', logoWidth / 1.5 + 'px');
+        $('header .card .top').css('font-size', logoWidth / 3 + 'px');
+        $('header .card .bot').css('font-size', logoWidth / 3 + 'px');
+
     });
 });
 
@@ -806,7 +840,7 @@ var cardSelect = false,
     playerSelect = false;
 
 $(document).ready(function() {
-    $(".cardGroup").on("click", ".card:not(.inPlay)", function() {
+    $(".cardGroup").on("click", ".card:not(.selected):not(.inPlay)", function() {
         cardSelect = true;
         $(".cardGroup").find(".selected").removeClass("selected");
         $(this).addClass("selected");
@@ -833,21 +867,43 @@ $(document).ready(function() {
 $(document).ready(function() {
     $("main").on("click", ".card:not(.selected)", function() {
 
-        if (playerSelect && $(this).data('card') != null && $("main").find("selected") != null) {
-            var prevPosition =  $("main").find(".selected");
-            var prevCard = $('.cardRow').find(prevPosition.data('card'));
+        if (playerSelect) {
+
+
+            var position,
+                prevPosition,
+                card = false,
+                prevCard = false;
+
+            prevPosition = $("main").find(".selected");
+            if (prevPosition.data('card')) {
+                prevCard = $('.cardRow').find(prevPosition.data('card'));
+                removeCard(prevCard, prevPosition);
+            }
 
             var position = $(this);
-            var card = $('.cardRow').find(position.data('card'));
+            if (position.data('card')) {
+                var card = $('.cardRow').find(position.data('card'));
+                removeCard(card, position);
+            }
 
-            removeCard(card, position);
+            //removeCard(card, position);
 
-            removeCard(prevCard, prevPosition);
+           // removeCard(prevCard, prevPosition);
 
-            addCard(card, prevPosition);
-            addCard(prevCard, position);
+            if (prevCard) {
+                addCard(prevCard, position);
+                console.log('d');
+            }
+            if (card) {
+                addCard(card, prevPosition);
+                console.log('umb');
+            }
+           // addCard(card, prevPosition);
+           // addCard(prevCard, position);
 
             playerSelect = false;
+            console.log(prevCard == false);
 
         } else {
             playerSelect = true;
@@ -892,9 +948,6 @@ function addCard(card, position) {
     position.replaceWith(cardClone);
 
 
-    console.log(cardIndex);
-    console.log(inPlay);
-
     if (positionData.substring(2) == "player") {
         players[positionData.charAt(0)].cards[positionData.charAt(1)] = deck[cardIndex];
     } else {
@@ -933,13 +986,20 @@ function removeCard(card, position) {
 
 $(document).ready(function() {
     $(".calculate").on("click", function() {
-        $('.winrate').text(calculateWinPercentage (100000));
+        //$('.overlay').show();
+        //$('.loadingBar').show();
+        outcome = calculateWinPercentage (100000);
+        $('.outcome').show();
+        $('.winRate').text("Win Rate: " + outcome[0] + "%");
+        $('.tieRate').text("Tie Rate: " + outcome[1] + "%");
+        //  $('.overlay').hide();
+        //  $('.loadingBar').hide();
     });
 });
 
 $(document).ready(function() {
     $(".add-player").on("click", function() {
-        $(this).css("visibility", "hidden");
+        $(this).hide();
         var player = $(this).parent();
         player.find(".card").css("visibility", "visible");
         player.find('.removePlayer').css("visibility", "visible");
@@ -948,7 +1008,7 @@ $(document).ready(function() {
 });
 
 $(document).ready(function() {
-    $(".remove").on("click", function() {
+    $(".card .remove").on("click", function() {
         var position = $(this).parent();
         if (position.hasClass('selected')) {
             playerSelect = false;
@@ -962,7 +1022,7 @@ $(document).ready(function() {
     $(".removePlayer").on("click", function() {
         $(this).css('visibility', 'hidden');
         var player = $(this).parent();
-        player.find('input').css('visibility', 'visible');
+        players[player.data("player")].inPlay = false;
         if (player.find('.card').hasClass('selected')) {
             playerSelect = false;
         }
@@ -973,7 +1033,9 @@ $(document).ready(function() {
             }
             $(this).css('visibility', 'hidden');
         });
-
+        window.setTimeout(function() {
+            player.find('input').show(1);
+        }, 100);
     });
 });
 

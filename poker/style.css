@@ -76,9 +76,8 @@ html {
 
 body {
     line-height: 1;
-    background: url(brillant/brillant.png) repeat;
-    background-color: white;
     height: 100%;
+    background-color: lightblue;
 }
 ol, ul {
     list-style: none;
@@ -100,19 +99,107 @@ body {
     font-size: 16px;
 }
 
-#content {
+.overlay {
+    position: fixed;
     width: 100%;
     height: 100%;
+    background-color: black;
+    opacity: .6;
+    z-index: 999999;
+    display: none;
 }
+
+div.loadingBar {
+    position: fixed;
+    bottom: 0;
+    height: 2px;
+    width: 0;
+    background-color: deepskyblue;
+    opacity: 1;
+    display: none;
+}
+
+.filler {
+    width: 100%;
+    height: 90%;
+    max-height: 891px;
+    background: url(brillant/brillant.png) repeat;
+    padding: 3px 0;
+    min-height: 843px;
+}
+
+#content {
+    margin: auto;
+    width: 100%;
+    height: 100%;
+    max-width: 1920px;
+    max-height: 891px;
+    min-height: 837px;
+}
+
+header {
+    height: 77px;
+    background-color: lightblue;
+    text-align: center;
+}
+
+.logo {
+    height: 100%;
+    float: left;
+    border: 1px solid black;
+    border-radius: 50%;
+    background-color: white;
+}
+
+.logo .card {
+    top: 1.5%;
+    height: 94%;
+    width: 47%;
+    transform: rotate(45deg);
+}
+
+
+.logo .card:hover {
+    transform: scale(1.1);
+}
+
+.headline {
+    padding-top: .5%;
+    margin-bottom: .5%;
+}
+
+.motto {
+    font-size: 120%;
+}
+
+footer {
+    position: relative;
+    width: 100%;
+    height-min: 10px;
+    height: 2%;
+    text-align: center;
+    vertical-align: bottom;
+    font-size: small;
+    background-color: lightblue;
+}
+
+footer p {
+    position: absolute;
+    vertical-align: center;
+    margin: 0 auto;
+    top: 50%;
+    width: 100%;
+    transform: translate(0, -50%);
+}
+
 
 main {
     position: relative;
-    height: 90%;
+    height: 100%;
     padding: 0;
     background-color: hsl(330, 6%, 93%);
     border-radius: 10px;
     border: 1px solid hsl(0, 0%, 79%);
-
 }
 
 .button {
@@ -158,13 +245,12 @@ main {
 
 .game-board > div {
     position: absolute;
-    top: 20%;
+    top: 15%;
     width: 100%;
 }
 
 .game-board > div > div  {
     display: inline-block;
-    border: 1px solid black;
     padding: 5px;
 
 }
@@ -174,7 +260,7 @@ main {
     position: absolute;
     text-align: center;
     background-color: hsl(330, 6%, 85%);/*hsla(250, 100%, 87.5%, 1);*/
-    border-radius: 10px;
+    border-radius: 5px;
     border: 1px solid hsl(0, 0%, 79%);
     vertical-align: bottom;
 }
@@ -183,7 +269,7 @@ main {
     visibility: hidden;
 }
 
-.removePlayer {
+.remove {
     position: absolute;
     right: -1px;
     top: -1px;
@@ -192,15 +278,37 @@ main {
     text-indent: 0;
     border: 1px solid black;
     text-align: center;
-    border-top-right-radius: 10px;
+    border-top-right-radius: 5px;
     visibility: hidden;
+
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+
+    -webkit-backface-visibility: hidden;
+    -webkit-transform: translateZ(0) scale(1.0, 1.0);
 }
+
+.remove:hover {
+    cursor: pointer;
+    background-color: darkred;
+}
+
+
+.card .remove:hover {
+    background-color: darkred;
+}
+
 
 .add-player {
     width: 95%;
     left: 2.55%;
     top: 25%;
     height: 50%;
+    z-index: 0;
 
 }
 
@@ -252,6 +360,18 @@ main {
     border: 2px solid black;
     width: fit-content;
     padding: 5px;
+}
+
+.outcome {
+    display: none;
+    margin-top: 4px;
+    border: 1px solid black;
+    background-color: white;
+    padding: 3px;
+}
+
+.winRate {
+    margin-bottom: 3px;
 }
 
 .cardGroup {
