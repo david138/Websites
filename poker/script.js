@@ -740,7 +740,7 @@ $(document).ready(function() {
     $('main .card').css('height', $('.cardRow .card').css('height'));
     $('main .card').css('width', $('.cardRow .card').css('width'));
 
-    $('main .removePlayer').css('font-size', objWidth / 8 + 'px');
+    $('main .removePlayer').css('font-size', objWidth / 5 + 'px');
 
     $('header .logo').css('width', $('header .logo').css('height'));
     $('header .logo .card').css('width', '47%');
@@ -821,7 +821,7 @@ $(document).ready(function() {
         $('main .card').css('height', $('.cardRow .card').css('height'));
         $('main .card').css('width', $('.cardRow .card').css('width'));
 
-        $('main .removePlayer').css('font-size', objWidth / 8 + 'px');
+        $('main .removePlayer').css('font-size', objWidth / 5 + 'px');
 
         $('header .logo').css('width', $('header .logo').css('height'));
         $('header .logo .card').css('width', '47%');
