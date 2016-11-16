@@ -109,14 +109,13 @@ body {
     display: none;
 }
 
-div.loadingBar {
+#loadingBar {
     position: fixed;
     bottom: 0;
-    height: 2px;
+    height: 10px;
     width: 0;
-    background-color: deepskyblue;
-    opacity: 1;
-    display: none;
+    background-color: red;
+
 }
 
 .filler {
@@ -151,21 +150,23 @@ header {
     background-color: white;
 }
 
-.logo .card {
+header .logo .card {
     top: 1.5%;
     height: 94%;
     width: 47%;
     transform: rotate(45deg);
+    cursor: default;
 }
 
 
 .logo .card:hover {
-    transform: scale(1.1);
+    transform: rotate(45deg);
 }
 
 .headline {
-    padding-top: .5%;
-    margin-bottom: .5%;
+    padding-top: 10px;
+    margin-bottom: 10px;
+    font-size: 150%;
 }
 
 .motto {
@@ -330,7 +331,8 @@ main {
 }
 
 .player.player2 {
-    top: 42.5%;
+    top: 50%;
+    transform: translate(0, -50%);
     left: 82%;
 }
 
@@ -368,6 +370,7 @@ main {
     border: 1px solid black;
     background-color: white;
     padding: 3px;
+    border-radius: 5px;
 }
 
 .winRate {

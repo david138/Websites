@@ -607,6 +607,7 @@ function calculateWinPercentage (trials) {
     for (i = 0; i < players.length; i++) {
         players[i].inPlay ? playersPlaying.push( players[i] ) : null;
     }
+    
     for (i = 0; i < trials; i ++) {
 
         !playersPlaying[0].cards[0].inPlay ? playersPlaying[0].cards[0] = randomCard() : null;
@@ -899,11 +900,14 @@ $(document).ready(function() {
                 addCard(card, prevPosition);
                 console.log('umb');
             }
-           // addCard(card, prevPosition);
-           // addCard(prevCard, position);
 
             playerSelect = false;
-            console.log(prevCard == false);
+
+            if (!card && !prevCard) {
+                $("main").find(".selected").removeClass("selected");
+                $(this).addClass("selected");
+                playerSelect = true;
+            }
 
         } else {
             playerSelect = true;
