@@ -27,8 +27,48 @@
     <div class="filler">
         <div id="content" class="group">
 
-            <div class="col-1" style="height: 90%;"></div>
+            <div class="col-1 push" style="height: 90%;"></div>
             <main class="board group col-6">
+
+                <div class="player player1" data-player="0">
+                    <div class="card" data-position="00player">empty</div>
+                    <div class="card" data-position="01player">empty</div>
+
+                    <div class="outcome">
+                        <p class="winRate"></p>
+                        <p class="tieRate"></p>
+                    </div>
+
+                </div>
+
+                <div class="player player2" data-player="1">
+                    <div class="card" data-position="10player">empty</div>
+                    <div class="card" data-position="11player">empty</div>
+                </div>
+
+                <div class="player player3 " data-player="2">
+                    <div class="add-player togglePlayer"> + </div>
+                    <div class="card" data-position="20player">empty</div>
+                    <div class="card" data-position="21player">empty</div>
+                </div>
+
+                <div class="player player4" data-player="3">
+                    <div class="add-player togglePlayer"> + </div>
+                    <div class="card" data-position="30player">empty</div>
+                    <div class="card" data-position="31player">empty</div>
+                </div>
+
+                <div class="player player5" data-player="4">
+                    <div class="add-player togglePlayer"> + </div>
+                    <div class="card" data-position="40player">empty</div>
+                    <div class="card" data-position="41player">empty</div>
+                </div>
+
+                <div class="player player6" data-player="5">
+                    <div class="add-player togglePlayer"> + </div>
+                    <div class="card" data-position="50player">empty</div>
+                    <div class="card" data-position="51player">empty</div>
+                </div>
 
                 <div class="game-board">
                     <div>
@@ -45,50 +85,6 @@
                         </div>
                     </div>
                     <input type="submit" value="Calculate" class="button calculate">
-                </div>
-
-                <div class="player player1" data-player="0">
-                    <div class="card" data-position="00player">empty</div>
-                    <div class="card" data-position="01player">empty</div>
-
-                    <div class="outcome">
-                        <p class="winRate"></p>
-                        <p class="tieRate"></p>
-                    </div>
-
-                </div>
-
-                <div class="player player4" data-player="3">
-                    <div class="remove removePlayer"> + </div>
-                    <input type="submit" value="Add Player" class="button add-player">
-                    <div class="card" data-position="30player">empty</div>
-                    <div class="card" data-position="31player">empty</div>
-                </div>
-
-                <div class="player player3" data-player="2">
-                    <div class="remove removePlayer"> + </div>
-                    <input type="submit" value="Add Player" class="button add-player">
-                    <div class="card" data-position="20player">empty</div>
-                    <div class="card" data-position="21player">empty</div>
-                </div>
-
-                <div class="player player2" data-player="1">
-                    <div class="card" data-position="10player">empty</div>
-                    <div class="card" data-position="11player">empty</div>
-                </div>
-
-                <div class="player player5" data-player="4">
-                    <div class="remove removePlayer"> + </div>
-                    <input type="submit" value="Add Player" class="button add-player">
-                    <div class="card" data-position="40player">empty</div>
-                    <div class="card" data-position="41player">empty</div>
-                </div>
-
-                <div class="player player6" data-player="5">
-                    <div class="remove removePlayer"> + </div>
-                    <input type="submit" value="Add Player" class="button add-player">
-                    <div class="card" data-position="50player">empty</div>
-                    <div class="card" data-position="51player">empty</div>
                 </div>
 
             </main>

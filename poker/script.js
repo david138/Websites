@@ -687,15 +687,13 @@ $(document).ready(function() {
     var $card;
     var i, j, doubled, container;
 
-    var objHeight = $('main').css('height'),
-        objWidth = $('.hide').css('width');
-    objHeight = objHeight.substring(0, objHeight.length - 2);
-    objWidth = objWidth.substring(0, objWidth.length - 2) * .75;
+    var objWidth = $('.hide').width() / 2.4,
+        objHeight = $('main').height();
 
     for (i = 0; i < suits.length; i++) {
         var $suitsDiv = $('<div class="cardRow"></div>');
         doubled = false;
-        container = 0;
+        container = 12;
 
         for (j = 0; j < symbols.length; j++) {
             $card = $('<div></div>');
@@ -717,9 +715,8 @@ $(document).ready(function() {
             $card.append($mid);
             $card.append($bot);
 
-            $card.css('width', '100%');
-            $card.css('height', objWidth + 'px');
-            container = container + objWidth + 3.25;
+            container += objWidth * 1.6 + 4;
+
 
             if (!doubled && j > 6 && container > objHeight) {
                 $("#" + suits[i]).append($suitsDiv);
@@ -730,17 +727,22 @@ $(document).ready(function() {
         }
         $("#" + suits[i]).append($suitsDiv);
     }
-    $('.cardGroup').css('height', $('main').css('height'));
-    $('.card .remove').css('font-size', objWidth / 8 + 'px');
+
+    $('.card').width(objWidth);
+    $('.card').height(objWidth * 1.6);
+
+    $('.card .remove').css('font-size', objWidth / 6 + 'px');
     $('.card .remove').css('visibility', 'hidden');
-    $('.card .mid').css('font-size', objWidth / 3 + 'px');
-    $('.card .top').css('font-size', objWidth / 6 + 'px');
-    $('.card .bot').css('font-size', objWidth / 6 + 'px');
+    $('.card .mid').css('font-size', objWidth / 2 + 'px');
+    $('.card .top').css('font-size', objWidth / 3.6 + 'px');
+    $('.card .bot').css('font-size', objWidth / 3.6 + 'px');
 
     $('main .card').css('height', $('.cardRow .card').css('height'));
     $('main .card').css('width', $('.cardRow .card').css('width'));
 
-    $('main .removePlayer').css('font-size', objWidth / 5 + 'px');
+    $('main .togglePlayer').css('font-size', objWidth / 2 + 'px');
+
+    $('.cardGroup').height($('main').height() - 10);
 
     $('header .logo').css('width', $('header .logo').css('height'));
     $('header .logo .card').css('width', '47%');
@@ -760,25 +762,22 @@ $(document).ready(function() {
 
         var i, j, doubled, count, container;
 
-        var objHeight = $('main').css('height'),
-            objWidth = $('.hide').css('width'),
-            curCard;
-        objHeight = objHeight.substring(0, objHeight.length - 2);
-        objWidth = objWidth.substring(0, objWidth.length - 2) * .75;
+        var objWidth = $('.hide').width() / 2.4,
+            objHeight = $('main').height();
+
 
 
         $('.cardGroup').each(function() {
 
             count = 0;
             doubled = false;
-            container = 0;
+            container = 12;
 
             var $suitsDiv = $('<div class="cardRow"></div>');
             var firstGroup = $(this).children().first();
 
             firstGroup.children().each(function() {
-                $(this).css('height', objWidth + 'px');
-                container = container + objWidth + 3.25;
+                container = container + objWidth * 1.6 + 4;
 
                 if (!doubled && count > 6 && container > objHeight) {
                     $suitsDiv.after($('<div class="cardRow"></div>'));
@@ -790,8 +789,7 @@ $(document).ready(function() {
             });
 
             firstGroup.next().children().each(function () {
-                $(this).css('height', objWidth + 'px');
-                container = container + objWidth + 3.25;
+                container = container + objWidth * 1.6 + 4;
 
                 if (!doubled && count > 6 && container > objHeight) {
                     $suitsDiv.after($('<div class="cardRow"></div>'));
@@ -808,20 +806,20 @@ $(document).ready(function() {
             } else {
                 $(this).append($suitsDiv);
             }
-            $('.cardGroup').css('height', $('main').css('height'));
 
         });
 
-        $('.card').css('height', objWidth + 'px');
-        $('.card .remove').css('font-size', objWidth / 8 + 'px');
-        $('.card .mid').css('font-size', objWidth / 3 + 'px');
-        $('.card .top').css('font-size', objWidth / 6 + 'px');
-        $('.card .bot').css('font-size', objWidth / 6 + 'px');
+        $('.cardGroup').height($('main').height() - 10);
 
-        $('main .card').css('height', $('.cardRow .card').css('height'));
-        $('main .card').css('width', $('.cardRow .card').css('width'));
+        $('.card .remove').css('font-size', objWidth / 6 + 'px');
+        $('.card .mid').css('font-size', objWidth / 2 + 'px');
+        $('.card .top').css('font-size', objWidth / 3.6 + 'px');
+        $('.card .bot').css('font-size', objWidth / 3.6 + 'px');
 
-        $('main .removePlayer').css('font-size', objWidth / 5 + 'px');
+        $('.card').width(objWidth);
+        $('.card').height(objWidth * 1.6);
+
+        $('main .togglePlayer').css('font-size', objWidth / 2 + 'px');
 
         $('header .logo').css('width', $('header .logo').css('height'));
         $('header .logo .card').css('width', '47%');
@@ -831,8 +829,8 @@ $(document).ready(function() {
         logoWidth = logoWidth.substring(0, logoWidth.length - 2);
 
         $('header .card .mid').css('font-size', logoWidth / 1.5 + 'px');
-        $('header .card .top').css('font-size', logoWidth / 3 + 'px');
-        $('header .card .bot').css('font-size', logoWidth / 3 + 'px');
+        $('header .card .top').css('font-size', logoWidth / 3.8 + 'px');
+        $('header .card .bot').css('font-size', logoWidth / 3.8 + 'px');
 
     });
 });
@@ -887,10 +885,6 @@ $(document).ready(function() {
                 var card = $('.cardRow').find(position.data('card'));
                 removeCard(card, position);
             }
-
-            //removeCard(card, position);
-
-           // removeCard(prevCard, prevPosition);
 
             if (prevCard) {
                 addCard(prevCard, position);
@@ -994,20 +988,10 @@ $(document).ready(function() {
         //$('.loadingBar').show();
         outcome = calculateWinPercentage (100000);
         $('.outcome').show();
-        $('.winRate').text("Win Rate: " + outcome[0] + "%");
-        $('.tieRate').text("Tie Rate: " + outcome[1] + "%");
+        $('.winRate').text("Win: " + outcome[0] + "%");
+        $('.tieRate').text("Tie: " + outcome[1] + "%");
         //  $('.overlay').hide();
         //  $('.loadingBar').hide();
-    });
-});
-
-$(document).ready(function() {
-    $(".add-player").on("click", function() {
-        $(this).hide();
-        var player = $(this).parent();
-        player.find(".card").css("visibility", "visible");
-        player.find('.removePlayer').css("visibility", "visible");
-        players[player.data("player")].inPlay = true;
     });
 });
 
@@ -1023,8 +1007,23 @@ $(document).ready(function() {
 });
 
 $(document).ready(function() {
-    $(".removePlayer").on("click", function() {
-        $(this).css('visibility', 'hidden');
+    $("div").on("click", ".add-player", function() {
+
+        $(this).text('-').css('line-height', '100%').removeClass('add-player').addClass('remove-player');
+
+        var player = $(this).parent();
+        player.find(".card").css("visibility", "visible");
+        player.find('.removePlayer').css("visibility", "visible");
+        players[player.data("player")].inPlay = true;
+    });
+});
+
+$(document).ready(function() {
+    $("div").on("click", ".remove-player", function() {
+
+        console.log('hi');
+        $(this).text('+').css('line-height', '135%').removeClass('remove-player').addClass('add-player');
+
         var player = $(this).parent();
         players[player.data("player")].inPlay = false;
         if (player.find('.card').hasClass('selected')) {
@@ -1037,9 +1036,6 @@ $(document).ready(function() {
             }
             $(this).css('visibility', 'hidden');
         });
-        window.setTimeout(function() {
-            player.find('input').show(1);
-        }, 100);
     });
 });
 
