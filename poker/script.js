@@ -48,6 +48,15 @@ for (var p = 0; p < players.length; p++) {
 players[0].inPlay = true;
 players[1].inPlay = true;
 
+function sortHand (cards) {
+    var numbers = [];
+
+    for (i = 0; i < cards.length; i ++) {
+        numbers.push(cards[i].num);
+    }
+    return numbers.sort(function(a, b){return b-a});
+}
+
 /*
  Returns the strength of a given hand.
  */
@@ -682,13 +691,22 @@ function removeRandom(cards) {
 }
 
 
-
-$(document).ready(function() {
+$(window).bind("load", function() {
     var $card;
-    var i, j, doubled, container;
+    var i, j, doubled, container, cardHeight;
 
-    var objWidth = $('.hide').width() / 2.4,
-        objHeight = $('main').height();
+    if ($(".filler").width() > 740) {
+        cardHeight = 1.6;
+    } else {
+        cardHeight = 1;
+    }
+
+    var objWidth = $('.hide').width() / 2 - 10;
+
+    $('.filler').css('min-height', (objWidth + 4) * cardHeight * 7 + 4 + 10 + 'px');
+    $('main').css('min-height', (objWidth + 4) * cardHeight * 7 + 4 + 'px');
+
+    var objHeight = $('main').height();
 
     for (i = 0; i < suits.length; i++) {
         var $suitsDiv = $('<div class="cardRow"></div>');
@@ -697,10 +715,10 @@ $(document).ready(function() {
 
         for (j = 0; j < symbols.length; j++) {
             $card = $('<div></div>');
-            $card.addClass(suits[i]  + " card " + i + j);
+            $card.addClass(suits[i]  + " card " + i + j + " c" + i + j);
             $card.data("card", "." + i.toString() + j.toString());
 
-            var $remove = $("<div> &#x2716; </div>");
+            var $remove = $("<div> <p> &#x2716; </p> </div>");
             var $top = $("<div>" + symbols[j] + "<div class='symbol'>" + suitsSymbols[i] + "</div></div>");
             var $mid = $("<div>" + symbols[j] + "</div>");
             var $bot = $("<div>" + symbols[j] + "<div class='symbol'>" + suitsSymbols[i] + "</div></div>");
@@ -715,7 +733,7 @@ $(document).ready(function() {
             $card.append($mid);
             $card.append($bot);
 
-            container += objWidth * 1.6 + 4;
+            container += objWidth * cardHeight + 4;
 
 
             if (!doubled && j > 6 && container > objHeight) {
@@ -728,112 +746,89 @@ $(document).ready(function() {
         $("#" + suits[i]).append($suitsDiv);
     }
 
+    $('.cardRow').width(objWidth + 4);
     $('.card').width(objWidth);
-    $('.card').height(objWidth * 1.6);
+    $('.card').height(objWidth * cardHeight);
 
-    $('.card .remove').css('font-size', objWidth / 6 + 'px');
-    $('.card .remove').css('visibility', 'hidden');
-    $('.card .mid').css('font-size', objWidth / 2 + 'px');
-    $('.card .top').css('font-size', objWidth / 3.6 + 'px');
-    $('.card .bot').css('font-size', objWidth / 3.6 + 'px');
+    $('.cardGroup').height($('main').height() - 4);
+        console.log($('main').height());
 
-    $('main .card').css('height', $('.cardRow .card').css('height'));
-    $('main .card').css('width', $('.cardRow .card').css('width'));
-
-    $('main .togglePlayer').css('font-size', objWidth / 2 + 'px');
-
-    $('.cardGroup').height($('main').height() - 10);
-
-    $('header .logo').css('width', $('header .logo').css('height'));
-    $('header .logo .card').css('width', '47%');
-    $('header .logo .card').css('height', '94%');
-
-    var logoWidth = $('header .logo .card').css('width');
-    logoWidth = logoWidth.substring(0, logoWidth.length - 2);
-
-    $('header .card .mid').css('font-size', logoWidth / 1.5 + 'px');
-    $('header .card .top').css('font-size', logoWidth / 3 + 'px');
-    $('header .card .bot').css('font-size', logoWidth / 3 + 'px');
+    setTimeout(function(){ resizeBoard() }, 200);
 
 });
 
 $(document).ready(function() {
-    $( window ).resize(function() {
+    $(window).resize(function() {
+        resizeBoard();
+        setTimeout(function(){ resizeBoard() }, 200);
+    })});
 
-        var i, j, doubled, count, container;
+function resizeBoard() {
+    var i, j, doubled, count, container, cardHeight;
 
-        var objWidth = $('.hide').width() / 2.4,
-            objHeight = $('main').height();
+    if ($(".filler").width() > 740) {
+        cardHeight = 1.6;
+    } else {
+        cardHeight = 1;
+    }
 
+    var objWidth = $('.hide').width() / 2 - 10;
 
+    $('.filler').css('min-height', (objWidth + 4) * cardHeight * 7 + 4 + 10 + 'px');
+    $('main').css('min-height', (objWidth + 4) * cardHeight * 7 + 4 + 'px');
 
-        $('.cardGroup').each(function() {
+    var objHeight = $('main').height();
 
-            count = 0;
-            doubled = false;
-            container = 12;
+    $('.cardGroup').each(function() {
 
-            var $suitsDiv = $('<div class="cardRow"></div>');
-            var firstGroup = $(this).children().first();
+        count = 0;
+        doubled = false;
+        container = 12;
 
-            firstGroup.children().each(function() {
-                container = container + objWidth * 1.6 + 4;
+        var $suitsDiv = $('<div class="cardRow"></div>');
+        var firstGroup = $(this).children().first();
 
-                if (!doubled && count > 6 && container > objHeight) {
-                    $suitsDiv.after($('<div class="cardRow"></div>'));
-                    $suitsDiv = $suitsDiv.next();
-                    doubled = true;
-                }
-                $suitsDiv.append($(this));
-                count ++;
-            });
+        firstGroup.children().each(function() {
+            container = container + objWidth * cardHeight + 4;
 
-            firstGroup.next().children().each(function () {
-                container = container + objWidth * 1.6 + 4;
-
-                if (!doubled && count > 6 && container > objHeight) {
-                    $suitsDiv.after($('<div class="cardRow"></div>'));
-                    $suitsDiv = $suitsDiv.next();
-                    doubled = true;
-                }
-                $suitsDiv.append($(this));
-                count ++;
-            });
-            $(this).empty();
-            if (doubled) {
-                $(this).append($suitsDiv.prev());
-                $(this).append($suitsDiv);
-            } else {
-                $(this).append($suitsDiv);
+            if (!doubled && count > 6 && container > objHeight) {
+                $suitsDiv.after($('<div class="cardRow"></div>'));
+                $suitsDiv = $suitsDiv.next();
+                doubled = true;
             }
-
+            $suitsDiv.append($(this));
+            count ++;
         });
 
-        $('.cardGroup').height($('main').height() - 10);
+        firstGroup.next().children().each(function () {
+            container = container + objWidth * cardHeight + 4;
 
-        $('.card .remove').css('font-size', objWidth / 6 + 'px');
-        $('.card .mid').css('font-size', objWidth / 2 + 'px');
-        $('.card .top').css('font-size', objWidth / 3.6 + 'px');
-        $('.card .bot').css('font-size', objWidth / 3.6 + 'px');
-
-        $('.card').width(objWidth);
-        $('.card').height(objWidth * 1.6);
-
-        $('main .togglePlayer').css('font-size', objWidth / 2 + 'px');
-
-        $('header .logo').css('width', $('header .logo').css('height'));
-        $('header .logo .card').css('width', '47%');
-        $('header .logo .card').css('height', '94%');
-
-        var logoWidth = $('header .logo .card').css('width');
-        logoWidth = logoWidth.substring(0, logoWidth.length - 2);
-
-        $('header .card .mid').css('font-size', logoWidth / 1.5 + 'px');
-        $('header .card .top').css('font-size', logoWidth / 3.8 + 'px');
-        $('header .card .bot').css('font-size', logoWidth / 3.8 + 'px');
+            if (!doubled && count > 6 && container > objHeight) {
+                $suitsDiv.after($('<div class="cardRow"></div>'));
+                $suitsDiv = $suitsDiv.next();
+                doubled = true;
+            }
+            $suitsDiv.append($(this));
+            count ++;
+        });
+        $(this).empty();
+        if (doubled) {
+            $(this).append($suitsDiv.prev());
+            $(this).append($suitsDiv);
+        } else {
+            $(this).append($suitsDiv);
+        }
 
     });
-});
+
+    $('.cardRow').width(objWidth + 4);
+    $('.card').width(objWidth);
+    $('.card').height(objWidth * cardHeight);
+
+
+    $('.cardGroup').height($('main').height() - 4);
+    // $('.filler').height($('main').height() - 4);
+}
 
 var cardSelect = false,
     playerSelect = false;
@@ -888,11 +883,9 @@ $(document).ready(function() {
 
             if (prevCard) {
                 addCard(prevCard, position);
-                console.log('d');
             }
             if (card) {
                 addCard(card, prevPosition);
-                console.log('umb');
             }
 
             playerSelect = false;
@@ -939,7 +932,7 @@ function addCard(card, position) {
     var cardClone = card.clone(true);
     card.addClass("inPlay");
     cardClone.css('width', $('.cardRow .card').css('width'));
-    cardClone.find('.remove').css('visibility', 'visible');
+    cardClone.find('.remove').show()
 
     cardClone.data("position", positionData);
 
@@ -987,7 +980,6 @@ $(document).ready(function() {
         //$('.overlay').show();
         //$('.loadingBar').show();
         outcome = calculateWinPercentage (100000);
-        $('.outcome').show();
         $('.winRate').text("Win: " + outcome[0] + "%");
         $('.tieRate').text("Tie: " + outcome[1] + "%");
         //  $('.overlay').hide();
@@ -996,7 +988,7 @@ $(document).ready(function() {
 });
 
 $(document).ready(function() {
-    $(".card .remove").on("click", function() {
+    $(document).on("click", ".card .remove", function() {
         var position = $(this).parent();
         if (position.hasClass('selected')) {
             playerSelect = false;
@@ -1007,10 +999,11 @@ $(document).ready(function() {
 });
 
 $(document).ready(function() {
-    $("div").on("click", ".add-player", function() {
+    $(document).on("click", ".add-player", function() {
 
-        $(this).text('-').css('line-height', '100%').removeClass('add-player').addClass('remove-player');
-
+        console.log('dumb');
+        $(this).find('p').text('-').css('top', '35%');
+        $(this).removeClass('add-player').addClass('remove-player');
         var player = $(this).parent();
         player.find(".card").css("visibility", "visible");
         player.find('.removePlayer').css("visibility", "visible");
@@ -1019,10 +1012,11 @@ $(document).ready(function() {
 });
 
 $(document).ready(function() {
-    $("div").on("click", ".remove-player", function() {
+    $(document).on("click", ".remove-player", function() {
 
         console.log('hi');
-        $(this).text('+').css('line-height', '135%').removeClass('remove-player').addClass('add-player');
+        $(this).find('p').text('+').css('top', '45%');
+        $(this).removeClass('remove-player').addClass('add-player');
 
         var player = $(this).parent();
         players[player.data("player")].inPlay = false;
@@ -1038,311 +1032,3 @@ $(document).ready(function() {
         });
     });
 });
-
-/*function cardPlaced() {
- if (playerSelect && cardSelect) {
-
- var selected = $(".cardGroup").find(".selected"); // Card to be put in play
- var old = $("main").find(".selected"); // Position of new card
-
- var inPlay = selected.data("card"); //information of new card
- var outPlay = old.data("card"); //information of old card, if exists
-
- var cardIndex = parseInt(inPlay.charAt(1) * 13 + inPlay.charAt(2)); // Index of new card in cards array
-
- if (outPlay != null) {
- deck[parseInt(outPlay.charAt(1) * 13) + parseInt(outPlay.substring(2))].inPlay = false;
- }
- deck[cardIndex].inPlay = true;
-
- var card = selected.clone(true);
- selected.addClass("inPlay");
- $(card).removeClass("selected");
- selected.removeClass("selected");
-
- // var removedCard = "." + old.text().substring(0, 2);
- $(".cardGroup").find(old.data("card")).removeClass("inPlay");
-
- $(card).data("position", old.data("position"));
-
- old.after(card);
- old.remove();
-
-
-
- var placement;
- var position = $(card).data("position");
-
-
- if (position.substring(2) == "player") {
-
- players[position.charAt(0)].cards[position.charAt(1)] = deck[cardIndex];
- } else {
- community[position.charAt(0)] = deck[cardIndex];
- }
-
-
- playerSelect = false;
- cardSelect = false;
- }
- }*/
-
-
-
-/*function playerCalc(curPlayer) {
-
- if (curPlayer == players.length - 1) {
- return communityCalc(0, 0)
- }
-
- if (!players[curPlayer].inPlay) {
- return playerCalc(curPlayer + 1);
- }
-
- if (players[curPlayer].cards[0] != null && players[curPlayer].cards[1] != null) {
- return playerCalc(curPlayer + 1);
- }
-
- var total = new Array(players.length).fill(0);
- var sum;
-
- if (players[curPlayer].cards[0] == null && players[curPlayer].cards[1] == null) {
- for (var i = 0; i < 52; i++) {
- if (deck[i].inPlay == false) {
- deck[i].inPlay = true;
- players[curPlayer].cards[0] = deck[i];
- for (var j = i + 1; j < 52; j++) {
- if (deck[j].inPlay == false) {
- deck[j].inPlay = true;
- players[curPlayer].cards[1] = deck[j];
-
- total =  sumArrays(total, playerCalc(curPlayer + 1));
-
- deck[j].inPlay = false;
- players[curPlayer].cards[0] = null;
- }
- }
-
- deck[i].inPlay = false;
- players[curPlayer].cards[0] = null;
- }
- }
- } else {
-
- var missing;
- if (players[curPlayer].cards[0] == null) {
- missing = 0;
- } else {
- missing = 1;
- }
- for (var i = 0; i < 52; i++) {
- if (deck[i].inPlay == false) {
- deck[i].inPlay = true;
- players[curPlayer].cards[missing] = deck[i];
-
- total =  sumArrays(total, playerCalc(curPlayer + 1));
-
- deck[i].inPlay = false;
- players[curPlayer].cards[missing] = null;
- }
- }
-
-
- }
- return total;
- }
-
- function communityCalc(curCard, counter) {
-
- if (community[curCard] == null) {
- var total = new Array(players.length).fill(0);
-
- for (var i = counter; i < 52; i++) {
- if (deck[i].inPlay == false) {
- community[curCard] = deck[i];
- deck[i].inPlay = true;
-
- if (curCard < 4) {
- total = sumArrays(total, communityCalc(curCard + 1, i + 1));
- } else {
- total[winner(players, community)] += 1;
- }
- deck[i].inPlay = false;
- community[curCard] = null;
- }
-
- }
-
- return total;
-
- } else {
- if (curCard < 4) {
- return communityCalc(curCard + 1, counter);
- } else {
- return new Array(players.length).fill(0)[winner(players, community)] ++;
- }
- }
-
- return -1;
- }*/
-
-var order = new Array(15);
-
-function handStrength(hand) {
-
-    var straight = true;
-    var flush = true;
-    var i;
-
-    var numbers = [];
-    for (i = 0; i < 5; i ++) {
-        numbers.push(hand[i].num);
-    }
-    numbers.sort(function(a, b){return a-b});
-
-    for (i = 0; i < 3; i++) {
-        if (numbers[i] + 1 != numbers[i + 1]) {
-            straight = false;
-        }
-    }
-
-    if (numbers[3] + 1 != numbers[4] && (numbers[0] != 2 || numbers[4] != 14)) {
-        straight = false;
-    }
-
-    for (i = 0; i < 4; i++) {
-        if (hand[i].suit != hand[i + 1].suit) {
-            flush = false;
-        }
-    }
-
-    if (straight == true) {
-        if (flush == true) {
-            return [8, numbers[4]];
-        } else {
-            return [4, numbers[4]];
-        }
-    }
-
-    if (flush == true) {
-        return [5, numbers[4], numbers[3], numbers[2], numbers[1], numbers[0]];
-    }
-
-    order.fill(0);
-
-    for (i = 0; i <= 4; i++) {
-        order[hand[i].num] += 1;
-    }
-
-    if (order.indexOf(4) != -1) {
-        return [7, order.indexOf(4), order.lastIndexOf(1)];
-    }
-
-    if (order.indexOf(3) != -1) {
-        if (order.indexOf(2) != -1) {
-            return [6, order.indexOf(3), order.indexOf(2)];
-        } else {
-            return [3, order.indexOf(3), order.lastIndexOf(1), order.indexOf(1)];
-        }
-    }
-
-    if (order.indexOf(2) != -1) {
-        var lowerPair = order.indexOf(2);
-        order[lowerPair] = 0;
-        if (order.indexOf(2) != -1) {
-            return [2, order.indexOf(2), lowerPair, order.indexOf(1)]
-        } else {
-            var lowest = order.indexOf(1);
-            order[lowest] = 0;
-            var lowest2 = order.indexOf(1);
-            order[lowest2] = 0;
-            var lowest3 = order.indexOf(1);
-            order[lowest3] = 0;
-            return [1, lowerPair, lowest3, lowest2, lowest];
-        }
-
-    }
-    return [0, numbers[4], numbers[3], numbers[2], numbers[1], numbers[0]];
-
-
-}
-
-function sortHand (cards) {
-    var numbers = [];
-
-    for (i = 0; i < cards.length; i ++) {
-        numbers.push(cards[i].num);
-    }
-    return numbers.sort(function(a, b){return b-a});
-}
-
-/*
- returns 1 if hand 1 is stronger than hand 2,
- or 2 if hand 2 is strong than hand 1.
- Returns -1 in case of tie.
- */
-function betterHand(h1Strength, h2Strength) {
-
-    for (var i = 0; i < h1Strength.length; i++) {
-        if (h1Strength[i] > h2Strength[i]) {
-            return 1;
-        }
-        if (h1Strength[i] < h2Strength[i]) {
-            return 2;
-        }
-    }
-    return 0;
-}
-
-/*
- given an array of cards, returns an array of
- the best hand.
- */
-function bestHand (cards)  {
-    var curBest = [-2];
-
-
-    for (var i = 0; i < 6; i++) {
-        for (var j = i + 1; j < 7; j++) {
-            var hand = cards.slice(0, i).concat(cards.slice(i + 1));
-            hand = hand.slice(0, j - 1).concat(hand.slice(j));
-            var cur = handStrength(hand);
-            if (betterHand(curBest, cur) == 2) {
-                curBest = cur;
-            }
-        }
-    }
-
-    return curBest;
-}
-
-function checkStraight(cards) {
-    var numbers = [];
-    for (i = 0; i < cards.length; i ++) {
-        numbers.push(cards[i].num);
-    }
-    numbers.sort(function(a, b){return a-b});
-
-    if (numbers[numbers.length - 1] == 14) {
-        numbers = [1].concat(numbers);
-    }
-
-    var straight = true,
-        j;
-    for (var i = cards.length - 1; i > 3; i--) {
-        straight = true;
-        j = i;
-        while (straight && j >= 0) {
-            if (numbers[j] - 1 != numbers[j - 1] && numbers[j] != numbers[j - 1]) {
-                straight = false;
-            }
-
-            if (straight && i - j == 3) {
-                return [true, numbers[i]];
-            }
-
-            j --;
-        }
-    }
-    return [false]
-}

@@ -99,41 +99,16 @@ body {
     font-size: 16px;
 }
 
-.overlay {
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    background-color: black;
-    opacity: .6;
-    z-index: 999999;
-    display: none;
-}
-
-#loadingBar {
-    position: fixed;
-    bottom: 0;
-    height: 10px;
-    width: 0;
-    background-color: red;
-
-}
-
 .filler {
     width: 100%;
     height: 90%;
     max-height: 891px;
     background-color: #f1f1f1;
     padding: 3px 0;
-    min-height: 843px;
 }
 
-#content {
-    margin: auto;
-    width: 100%;
-    height: 100%;
-    max-width: 1920px;
-    max-height: 891px;
-    min-height: 837px;
+.push {
+    height: 1px;
 }
 
 header {
@@ -175,9 +150,9 @@ header .logo .card {
 
 footer {
     position: relative;
+    float: left;
     width: 100%;
-    height-min: 10px;
-    height: 2%;
+    height: 10px;
     text-align: center;
     vertical-align: bottom;
     font-size: small;
@@ -276,9 +251,10 @@ main {
     text-align: center;
     width: 30%;
     height: 41.7%;
-    line-height: 135%;
     font-weight: bold;
     cursor: default;
+
+    font-size: 2vw;
 
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -289,6 +265,14 @@ main {
 
     -webkit-backface-visibility: hidden;
     -webkit-transform: translateZ(0) scale(1.0, 1.0);
+}
+
+.togglePlayer p {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
 }
 
 .player5 .togglePlayer, .player6 .togglePlayer {
@@ -352,10 +336,9 @@ main {
 .outcome {
     position: absolute;
     top: 100%;
+    left: 0;
     width: 100%;
-    display: none;
     border: 1px solid black;
-    padding: 3px;
     background-color: white;
     padding: 5px;
     border-radius: 5px;
@@ -368,7 +351,7 @@ main {
 .cardGroup {
     text-align: center;
     border-radius: 10px;
-    padding: 5px;
+    padding: 2px;
     border: 1px solid hsl(0, 0%, 79%);
     background-color: hsl(330, 6%, 93%);
     box-sizing: border-box;
@@ -376,10 +359,9 @@ main {
 
 .cardRow {
     display: inline-block;
-    margin: 0 .5%;
-    vertical-align:top;
+    margin: 0;
+    vertical-align: top;
     padding: 0;
-    width: 49%;
 }
 
 .card {
@@ -441,10 +423,19 @@ main {
     text-indent: 0;
     background-color: crimson;
     border: 1px solid crimson;
-    height: 15%;
-    width: 22.5%;
+    height: 25%;
+    width: 37.5%;
     text-align: center;
-    line-height: 110%;
+    font-size: 1vw;
+    display: none;
+}
+
+.remove p {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
 }
 
 .card .remove:hover {
@@ -459,14 +450,16 @@ main {
     left: 2%;
     text-align: center;
     text-indent: 0;
+    font-size: 1.1vw;
 }
 
 .card .symbol {
     position: absolute;
-    top: 45%;
+    top: 47%;
     height: 70%;
     width: 100%;
     text-align: center;
+    font-size: 1.1vw;
 }
 
 .card.h .top .symbol, .card.h .bot .symbol,
@@ -485,7 +478,9 @@ main {
 .card .mid {
     position: absolute;
     width: 100%;
-    top: 33.05%;
+    top: 49%;
+    transform: translate(0, -50%);
+    font-size: 1.5vw;
     text-align: center;
     vertical-align: middle;
     text-indent: 0;
@@ -500,27 +495,27 @@ main {
     text-align: center;
     transform: rotate(180deg);
     text-indent: 0;
+    font-size: 1.1vw;
 }
 
 .hide {
     visibility: hidden;
 }
 
-@media only screen and (max-width: 961px) {
-
-    #content {
-        min-height: 789px;
-    }
+@media only screen and (max-width: 1150px) {
 
     .filler {
-        min-height: 789px;
+        height: auto;
     }
 
     main.board {
         border: none;
         background-color: inherit;
         position: static;
+        height: auto;
         width: 39%;
+        height: auto;
+        float: left;
     }
 
     div.game-board {
@@ -580,6 +575,12 @@ main {
         right: auto;
         background-color: hsl(330, 6%, 93%);
         transform: translate(0, 0);
+        text-align: left;
+        padding: 3px;
+    }
+
+    div.player.player1 {
+        background-color: lightblue;
     }
 
     .player div.togglePlayer {
@@ -594,19 +595,158 @@ main {
         height: 100%;
         vertical-align: center;
 
-        line-height: 135%;
+        font-size: 6vw;
+    }
+
+    .outcome {
+        position: absolute;
+        top: 0;
+        left: auto;
+        right: 5px;
+        width: 30%;
+        height: 100%;
+        border: 1px solid black;
+        background-color: white;
+        padding: 5px;
+        border-radius: 5px;
+        vertical-align: center;
     }
 
     .cardGroup {
-        width: 14.8%;
+        width: 12.5%;
     }
 
     div.hide {
-       width: 14.8%;
+       width: 12.5%;
     }
 
     div.push {
+        width: 5%;
+    }
+
+    .card .top {
+        font-size: 1.5vw;
+    }
+
+    .card .mid {
+        font-size: 2.5vw;
+    }
+
+    .card .bot {
+        font-size: 1.5vw;
+    }
+
+    .card .symbol {
+        font-size: 1.5vw;
+    }
+
+}
+
+@media only screen and (max-width: 850px) {
+
+    main.board {
+        width: 48%;
+    }
+
+    .cardGroup {
+        width: 12.5%;
+    }
+
+    div.hide {
+        width: 12.5%;
+    }
+
+    div.push {
+        width: 0;
+    }
+
+    main .card {
+        margin-right: 22px;
+    }
+    main .card .remove {
+        height: 20px;
+        width: 20px;
+        right: -21px;
+        top: 0;
+        font-size: 20px;
+    }
+
+    main .game-board {
+        padding: 1px;
+        margin: 0;
+    }
+
+    main .game-board > div {
+        margin: 0;
+        padding: 5px;
+        padding-left: 20px;
+    }
+
+    main .game-board > div > div {
+        padding: 0;
+    }
+
+    main .game-board .turn {
+        clear: both;
+    }
+}
+
+@media only screen and (max-width: 740px) {
+
+    .filler {
+        min-width: 460px;
+    }
+
+    div.hide {
+        min-width: 83px;
+    }
+
+    main.board {
+        width: 58%;
+    }
+
+    .cardGroup {
+        width: 10%;
+    }
+
+    div.hide {
+        width: 18%;
+    }
+
+    .card .mid {
         display: none;
     }
 
+    .card .bot {
+        display: none;
+    }
+
+    .card .top {
+        width: 40%;
+        height: 40%;
+        position: absolute;
+        top: 30%;
+        left: 15%;
+        text-align: center;
+        text-indent: 0;
+        font-size: 3.5vw;
+    }
+
+    .card .symbol {
+        position: absolute;
+        top: 0;
+        left: 90%;
+        height: 100%;
+        width: 100%;
+        text-align: center;
+        font-size: 3.5vw;
+    }
+
+    .card.c08 .top, .card.c18 .top, .card.c28 .top, .card.c38 .top {
+        font-size: 3vw;
+    }
+
+    .card.c08 .symbol, .card.c18 .symbol, .card.c28 .symbol, .card.c38 .symbol {
+        left: 95%;
+    }
 }
