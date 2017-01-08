@@ -768,14 +768,15 @@ function resizeBoard() {
 
     if ($(".filler").width() > 740) {
         cardHeight = 1.6;
+        $('.filler').css('min-height', (objWidth + 4) * cardHeight * 7 + 4 + 10 + 'px');
+        $('main').css('min-height', (objWidth + 4) * cardHeight * 7 + 4 + 'px');
     } else {
         cardHeight = 1;
+        $('.filler').css('min-height', 'auto');
+        $('main').css('min-height', 'auto');
     }
 
     var objWidth = $('.hide').width() / 2 - 10;
-
-    $('.filler').css('min-height', (objWidth + 4) * cardHeight * 7 + 4 + 10 + 'px');
-    $('main').css('min-height', (objWidth + 4) * cardHeight * 7 + 4 + 'px');
 
     var objHeight = $('main').height();
 
@@ -826,8 +827,11 @@ function resizeBoard() {
     $('.card').height(objWidth * cardHeight);
 
 
-    $('.cardGroup').height($('main').height() - 4);
-    // $('.filler').height($('main').height() - 4);
+    if ($(".filler").width() > 740) {
+        $('.cardGroup').height($('main').height() - 4);
+    } else {
+        $('.cardGroup').height((objWidth * cardHeight + 4) * 13 + 5);
+    }
 }
 
 var cardSelect = false,

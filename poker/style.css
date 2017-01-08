@@ -22,6 +22,7 @@ time, mark, audio, video {
     font-size: 100%;
     font: inherit;
     vertical-align: baseline;
+    font-family: arial;
 }
 /* HTML5 display-role reset for older browsers */
 article, aside, details, figcaption, figure,
@@ -149,23 +150,19 @@ header .logo .card {
 }
 
 footer {
-    position: relative;
     float: left;
     width: 100%;
-    height: 10px;
     text-align: center;
     vertical-align: bottom;
     font-size: small;
+    line-height: 200%;
     background-color: lightblue;
 }
 
 footer p {
-    position: absolute;
     vertical-align: center;
-    margin: 0 auto;
-    top: 50%;
+    margin: 5px auto;
     width: 100%;
-    transform: translate(0, -50%);
 }
 
 
@@ -502,6 +499,10 @@ main {
     visibility: hidden;
 }
 
+input {
+    font-size: 2vw;
+}
+
 @media only screen and (max-width: 1150px) {
 
     .filler {
@@ -543,6 +544,7 @@ main {
         left: auto;
         width: 100%;
         height: 40px;
+        font-size: 22px;
     }
 
     .game-board > div {
@@ -640,6 +642,10 @@ main {
         font-size: 1.5vw;
     }
 
+    .player .togglePlayer:hover {
+        background-color: deepskyblue;
+    }
+
 }
 
 @media only screen and (max-width: 850px) {
@@ -688,6 +694,10 @@ main {
 
     main .game-board .turn {
         clear: both;
+    }
+
+    .player .togglePlayer:hover {
+        background-color: deepskyblue;
     }
 }
 
@@ -746,7 +756,66 @@ main {
         font-size: 3vw;
     }
 
+    .card.s .symbol, .card.d .symbol {
+        left: 80%;
+    }
+
     .card.c08 .symbol, .card.c18 .symbol, .card.c28 .symbol, .card.c38 .symbol {
         left: 95%;
+    }
+
+    main .game-board .card .remove{
+        right: 0;
+        top: auto;
+        bottom: 100%;
+    }
+
+    main .game-board .card {
+        margin: 22px 1px;
+    }
+
+    .player .togglePlayer:hover {
+        background-color: deepskyblue;
+    }
+    input {
+        font-size: 4vw;
+    }
+}
+
+@media only screen and (max-width: 740px) {
+    .filler .card .top {
+        font-size: 16px;
+    }
+
+    .filler .card .top .symbol {
+        font-size: 16px;
+    }
+
+    .card.c08 .top, .card.c18 .top, .card.c28 .top, .card.c38 .top {
+        left: 5%;
+    }
+
+    .card.c08 .symbol, .card.c18 .symbol, .card.c28 .symbol, .card.c38 .symbol {
+        left: 120%;
+    }
+
+    main .togglePlayer p {
+        font-size: 31px;
+    }
+
+    header {
+        min-width: 460px;
+    }
+
+    footer {
+        min-width: 460px;
+    }
+
+    .player .togglePlayer:hover {
+        background-color: deepskyblue;
+    }
+    input.calculate {
+        font-size: 4vw;
+        min-font-size: 22px;
     }
 }
