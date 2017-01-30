@@ -2,8 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16" />
     <link rel="stylesheet" href="style.css">
-    <title>Title</title>
+    <title>Show Down Odds</title>
 </head>
 <body>
 
@@ -15,68 +17,95 @@
                 <!--<div class="bot">A<div class="symbol">&clubs;</div></div>-->
             <!--</div>-->
         <!--</div>-->
-        <h3 class="headline"> Poker Calc </h3>
+        <h3 class="headline"> Show Down Odds </h3>
         <h5 class="motto"> The World Famous Poker Calculator</h5>
 
     </header>
 
     <div class="filler group">
 
-        <div class="col-1 push"></div>
-        <main class="board group col-6">
+        <div class="col-2 push"></div>
+        <main class="board group col-8">
 
-            <div class="player player1" data-player="0">
-                <div class="card" data-position="00player">empty</div>
-                <div class="card" data-position="01player">empty</div>
+
+            <div class="togglePlayer">
+                <div class="add-player"> + </div>
+                <div class="remove-player"> - </div>
+            </div>
+
+            <div class="player player1" id="1">
+                <div class="card" id="11c" data-card="11c">empty</div>
+                <div class="card" id="12c" data-card="12c">empty</div>
 
                 <div class="outcome">
-                    <p class="winRate"> Win: </p>
-                    <p class="tieRate"> Tie: </p>
+                    <p class="winRate"> Win %: </p>
+                    <p class="tieRate"> Tie %: </p>
                 </div>
 
             </div>
 
-            <div class="player player2" data-player="1">
-                <div class="card" data-position="10player">empty</div>
-                <div class="card" data-position="11player">empty</div>
+            <div class="player player2" id="2">
+                <div class="card" id="21c" data-card="21c">empty</div>
+                <div class="card" id="22c" data-card="22c">empty</div>
+
+                <div class="outcome">
+                    <p class="winRate"> Win %: </p>
+                    <p class="tieRate"> Tie %: </p>
+                </div>
             </div>
 
-            <div class="player player3 " data-player="2">
-                <div class="add-player togglePlayer"> <p> + </p> </div>
-                <div class="card" data-position="20player">empty</div>
-                <div class="card" data-position="21player">empty</div>
+            <div class="player player3 " id="3">
+                <div class="card" id="31c" data-card="31c">empty</div>
+                <div class="card" id="32c" data-card="32c">empty</div>
+
+                <div class="outcome">
+                    <p class="winRate"> Win %: </p>
+                    <p class="tieRate"> Tie %: </p>
+                </div>
             </div>
 
-            <div class="player player4" data-player="3">
-                <div class="add-player togglePlayer"> <p> + </p> </div>
-                <div class="card" data-position="30player">empty</div>
-                <div class="card" data-position="31player">empty</div>
+            <div class="player player4" id="4">
+                <div class="card" id="41c" data-card="41c">empty</div>
+                <div class="card" id="42c" data-card="42c">empty</div>
+
+                <div class="outcome">
+                    <p class="winRate"> Win %: </p>
+                    <p class="tieRate"> Tie %: </p>
+                </div>
             </div>
 
-            <div class="player player5" data-player="4">
-                <div class="add-player togglePlayer"> <p> + </p> </div>
-                <div class="card" data-position="40player">empty</div>
-                <div class="card" data-position="41player">empty</div>
+            <div class="player player5" id="5">
+                <div class="card" id="51c" data-card="51c">empty</div>
+                <div class="card" id="52c" data-card="52c">empty</div>
+
+                <div class="outcome">
+                    <p class="winRate"> Win %: </p>
+                    <p class="tieRate"> Tie %: </p>
+                </div>
             </div>
 
-            <div class="player player6" data-player="5">
-                <div class="add-player togglePlayer"> <p> + </p> </div>
-                <div class="card" data-position="50player">empty</div>
-                <div class="card" data-position="51player">empty</div>
+            <div class="player player6" id="6">
+                <div class="card" id="61c" data-card="61c">empty</div>
+                <div class="card" id="62c" data-card="62c">empty</div>
+
+                <div class="outcome">
+                    <p class="winRate"> Win %: </p>
+                    <p class="tieRate"> Tie %: </p>
+                </div>
             </div>
 
             <div class="game-board">
                 <div>
                     <div class="flop">
-                        <div class="card" data-position="0board">>empty</div>
-                        <div class="card" data-position="1board">empty</div>
-                        <div class="card" data-position="2board">empty</div>
+                        <div class="card" id="c1" data-card="c1">empty</div>
+                        <div class="card" id="c2" data-card="c2">empty</div>
+                        <div class="card" id="c3" data-card="c3">empty</div>
                     </div>
                     <div class="turn">
-                        <div class="card" data-position="3board">empty</div>
+                        <div class="card" id="c4" data-card="c4">empty</div>
                     </div>
                     <div class="river">
-                        <div class="card" data-position="4board">empty</div>
+                        <div class="card" id="c5" data-card="c5">empty</div>
                     </div>
                 </div>
                 <input type="submit" value="Calculate" class="button calculate">
@@ -85,10 +114,20 @@
         </main>
 
 
-        <div id="h" class="cardGroup col-1"></div>
-        <div id="c" class="cardGroup group col-1"></div>
-        <div id="d" class="cardGroup group col-1"></div>
-        <div id="s" class="cardGroup group col-1"></div>
+        <div class="selectors col-2">
+            <div class="ranks">
+
+            </div>
+
+            <div class="broadways">
+
+            </div>
+
+            <div class="suits">
+
+            </div>
+
+        </div>
 
         <div class="hide col-1"></div>
 
@@ -109,7 +148,8 @@
 
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
-    <script src="script.js" type="text/javascript"></script>
+    <script src="calculator.js" type="text/javascript"></script>
+    <script src="interact.js" type="text/javascript"></script>
 
 </body>
 </html>

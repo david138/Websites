@@ -78,7 +78,8 @@ html {
 body {
     line-height: 1;
     height: 100%;
-    background-color: lightblue;
+    background-color: hsl(330, 0%, 50%);
+    font-size: 16px;
 }
 ol, ul {
     list-style: none;
@@ -96,14 +97,11 @@ table {
     border-spacing: 0;
 }
 
-body {
-    font-size: 16px;
-}
-
 .filler {
     width: 100%;
-    height: 90%;
+    height: 100%;
     max-height: 891px;
+    min-height: 710px;
     background-color: #f1f1f1;
     padding: 3px 0;
 }
@@ -112,31 +110,15 @@ body {
     height: 1px;
 }
 
+
+
+
 header {
     height: 77px;
-    background-color: lightblue;
+    background-color: hsl(330, 0%, 50%);
     text-align: center;
-}
-
-.logo {
-    height: 100%;
-    float: left;
-    border: 1px solid black;
-    border-radius: 50%;
-    background-color: white;
-}
-
-header .logo .card {
-    top: 1.5%;
-    height: 94%;
-    width: 47%;
-    transform: rotate(45deg);
-    cursor: default;
-}
-
-
-.logo .card:hover {
-    transform: rotate(45deg);
+    color: white;
+    font-weight: bold;
 }
 
 .headline {
@@ -154,9 +136,10 @@ footer {
     width: 100%;
     text-align: center;
     vertical-align: bottom;
-    font-size: small;
+    font-size: 16px;
     line-height: 200%;
-    background-color: lightblue;
+    background-color: hsl(330, 0%, 50%);
+    color: white;
 }
 
 footer p {
@@ -168,6 +151,7 @@ footer p {
 
 main {
     position: relative;
+    min-height: 700px;
     height: 100%;
     padding: 0;
     border-radius: 10px;
@@ -179,23 +163,28 @@ main {
     position: absolute;
     text-align: center;
     border: none;
-    background-color: hsl(221, 100%, 61%);
-    border: 3px solid hsl(221, 100%, 61%);
-    border-radius: 10px;
-    transition: border-color 5s ease;
-    transition: background-color .2s ease;
+    background-color: darkblue;
+    color: white;
+    font-weight: bold;
+    cursor: default;
+
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+
+    -webkit-backface-visibility: hidden;
+    -webkit-transform: translateZ(0) scale(1.0, 1.0);
 }
 
 .button:hover {
-    background-color: hsl(218, 100%, 61%);
-    border-color: hsl(218, 100%, 61%);
-    cursor: pointer;
+    background-color: blue;
 }
 
 .button:active {
-    border-color: hsl(223, 100%, 61%);
-    outline: 0;
-    border-width: 5px;
+    background-color: dodgerblue;
 }
 
 .button:focus {
@@ -234,24 +223,29 @@ main {
     border-radius: 5px;
     border: 1px solid hsl(0, 0%, 79%);
     vertical-align: bottom;
-}
-
-.player3 .card, .player4 .card, .player5 .card, .player6 .card {
-    visibility: hidden;
+    padding: 3px;
 }
 
 .togglePlayer {
-    position: absolute;
-    left: 35%;
-    color: white;
-    background-color: dodgerblue;
+    margin-left: 10px;
+    margin-top: 10px;
+}
+
+.togglePlayer > div {
+    display: inline-block;
+    border: 1px solid hsl(0, 0%, 79%);
+    color: black;
+    background-color: hsl(330, 6%, 95%);
+    width: 60px;
     text-align: center;
-    width: 30%;
-    height: 41.7%;
     font-weight: bold;
     cursor: default;
+    margin: 0;
+    vertical-align: middle;
+    padding: 14px 0;
+    /*transform: translate(-50%, 0);*/
 
-    font-size: 2vw;
+    font-size: 30px;
 
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -261,36 +255,30 @@ main {
     user-select: none;
 
     -webkit-backface-visibility: hidden;
-    -webkit-transform: translateZ(0) scale(1.0, 1.0);
 }
 
-.togglePlayer p {
-    position: absolute;
-    top: 45%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-
+.togglePlayer > .remove-player {
+    font-size: 38px;
+    padding-top: 6px;
+    padding-bottom: 14px;
 }
 
-.player5 .togglePlayer, .player6 .togglePlayer {
-    bottom: -45%;
-}
+/*.togglePlayer > div p {*/
+    /*position: absolute;*/
+    /*top: 45%;*/
+    /*left: 50%;*/
+    /*transform: translate(-50%, -50%);*/
 
-.player3 .togglePlayer, .player4 .togglePlayer {
-    top: -45%;
-}
+/*}*/
 
-.togglePlayer:hover {
-    background-color: deepskyblue;
+.togglePlayer > div:hover {
+    background-color: hsl(330, 6%, 80%);
 }
 
 .player1 {
     top: 50%;
     transform: translate(0, -50%);
     right: 82%;
-    border: 1px solid hsl(330, 6%, 93%);
-    background-color: lightblue;
-    padding: 3px;
 }
 
 .player4 {
@@ -331,12 +319,10 @@ main {
 }
 
 .outcome {
-    position: absolute;
-    top: 100%;
-    left: 0;
     width: 100%;
     border: 1px solid black;
     background-color: white;
+    margin-top: 5px;
     padding: 5px;
     border-radius: 5px;
 }
@@ -345,38 +331,24 @@ main {
     margin-bottom: 3px;
 }
 
-.cardGroup {
-    text-align: center;
-    border-radius: 10px;
-    padding: 2px;
-    border: 1px solid hsl(0, 0%, 79%);
-    background-color: hsl(330, 6%, 93%);
-    box-sizing: border-box;
-}
-
-.cardRow {
-    display: inline-block;
-    margin: 0;
-    vertical-align: top;
-    padding: 0;
-}
-
 .card {
+    display: inline-block;
+    height: 100px;
+    width: 67px;
     box-sizing: border-box;
     background-color: white;
     padding: 0;
     margin: 1px;
     border: 1px solid black;
-    display: inline-block;
     border-radius: 5px;
     position: relative;
-    cursor: default;
+    cursor: pointer;
     vertical-align: middle;
     transition: all 0.1s ease-in-out;
     text-indent: -999999px;
     font-size: 100%;
     overflow: visible;
-    width: 100%;
+    box-shadow: 0 4px 4px 0 rgba(0,0,0,0.2), 4px 0 6px 0 rgba(0,0,0,0.1);
 
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -396,12 +368,12 @@ main {
 }
 
 .card:hover, .card:active {
-    transform: scale(1.1);
+    box-shadow: 0 4px 4px 2px rgba(0,0,0,0.2), 4px 0 6px 2px rgba(0,0,0,0.1);
     z-index: 999;
 }
 
 .card.selected {
-    transform: scale(1.2);
+    transform: scale(1.1);
     z-index: 99;
 }
 
@@ -450,25 +422,25 @@ main {
     font-size: 1.1vw;
 }
 
-.card .symbol {
+.card .suit {
     position: absolute;
-    top: 47%;
+    top: 60%;
     height: 70%;
     width: 100%;
     text-align: center;
     font-size: 1.1vw;
 }
 
-.card.h .top .symbol, .card.h .bot .symbol,
-.card.d .top .symbol, .card.d .bot .symbol {
+.card.h .top .suit, .card.h .bot .suit,
+.card.d .top .suit, .card.d .bot .suit {
     color: red;
 }
 
-.card.c .top .symbol, .card.c .bot .symbol {
+.card.c .top .suit, .card.c .bot .suit {
     background-position: 95% 102%;
 }
 
-.card.d .top .symbol, .card.d .bot .symbol {
+.card.d .top .suit, .card.d .bot .suit {
     background-position: 62% 102%;
 }
 
@@ -502,6 +474,76 @@ main {
 input {
     font-size: 2vw;
 }
+
+.selectors {
+    text-align: center;
+    border-radius: 10px;
+    padding: 2px 0;
+    border: 1px solid hsl(0, 0%, 79%);
+    background-color: hsl(330, 6%, 93%);
+    box-sizing: border-box;
+    height: 100%;
+    text-align: center;
+}
+
+.ranks, .broadways, .suits {
+    display: inline-block;
+    width: 23%;
+    margin: 0;
+    vertical-align: top;
+    text-align: center;
+    font-size: 20px;
+}
+
+.suits {
+    width: 40%;
+}
+
+.suits {
+    font-size: 30px;
+}
+
+.suits > p:last-child {
+    font-size: 20px;
+    padding: 16px 0;
+}
+
+.ranks > p, .suits > p, .broadways > p {
+    font-weight: bold;
+    margin: 7px auto;
+    width: 50px;
+    padding: 16px 0;
+    border: 1px solid hsl(0, 0%, 79%);
+    background-color: hsl(330, 6%, 95%);
+    cursor: default;
+
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+
+    -webkit-backface-visibility: hidden;
+    -webkit-transform: translateZ(0) scale(1.0, 1.0);
+}
+
+.suits > p:first-child, .suits > p:nth-child(3) {
+    color: red;
+}
+
+.ranks > p:hover, .suits > p:hover, .broadways > p:hover {
+    background-color: hsl(330, 6%, 80%);
+}
+
+@media only screen and (max-width: 1300px) {
+    .card {
+        height: 75px;
+        width: 50px;
+    }
+}
+
+
 
 @media only screen and (max-width: 1150px) {
 
@@ -638,12 +680,16 @@ input {
         font-size: 1.5vw;
     }
 
-    .card .symbol {
+    .card .suit {
         font-size: 1.5vw;
     }
 
     .player .togglePlayer:hover {
         background-color: deepskyblue;
+    }
+
+    .outcome {
+        position: absolute;
     }
 
 }
@@ -742,7 +788,7 @@ input {
         font-size: 3.5vw;
     }
 
-    .card .symbol {
+    .card .suit {
         position: absolute;
         top: 0;
         left: 90%;
@@ -756,11 +802,11 @@ input {
         font-size: 3vw;
     }
 
-    .card.s .symbol, .card.d .symbol {
+    .card.s .uit, .card.d .suit {
         left: 80%;
     }
 
-    .card.c08 .symbol, .card.c18 .symbol, .card.c28 .symbol, .card.c38 .symbol {
+    .card.c08 .suit, .card.c18 .suit, .card.c28 .suit, .card.c38 .suit {
         left: 95%;
     }
 
@@ -787,7 +833,7 @@ input {
         font-size: 16px;
     }
 
-    .filler .card .top .symbol {
+    .filler .card .top .suit {
         font-size: 16px;
     }
 
@@ -795,7 +841,7 @@ input {
         left: 5%;
     }
 
-    .card.c08 .symbol, .card.c18 .symbol, .card.c28 .symbol, .card.c38 .symbol {
+    .card.c08 .suit, .card.c18 .suit, .card.c28 .suit, .card.c38 .suit {
         left: 120%;
     }
 
