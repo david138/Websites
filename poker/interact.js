@@ -2,8 +2,6 @@
  * Created by luked on 1/28/2017.
  */
 
-var CURRENT_PLAYERS = INITIAL_PLAYERS;
-
 var cardsInPlayCount = {};
 for (var rank in ranks) {
     cardsInPlayCount[ranks[rank]] = 0;
@@ -86,8 +84,19 @@ $(document).ready(function() {
         }
     }
 
-    function removeCard(visualCard, code) {
 
+    function addCard(rank, suit, removeType) {
+        cardsInPlayCount[removeType] ++;
+        if (rank != ranks.random && suit != ranks.random) {
+            cardsInPlay[rank + suit] = true;
+        }
+    }
+
+    function removeCard(rank, suit, removeType) {
+        cardsInPlayCount[removeType] --;
+        if (rank != ranks.random && suit != suits.random) {
+            cardsInPlay[rank + suit] = false;
+        }
     }
 
     function convertSymbol(symbol) {
@@ -128,6 +137,34 @@ $(document).ready(function() {
         }
     });
 
+    $(document).on("click", ".remove-player", function() { //function doesnt work suits not being converted
+        if (CURRENT_PLAYERS > INITIAL_PLAYERS) {
+            players["player" + CURRENT_PLAYERS].inPlay = false;
+
+            var rank, suit, code, card;
+
+            $('#' + CURRENT_PLAYERS).find('.card').each(function() {
+                rank = convertSymbol($(this).find('.rank').first().text());
+                suit = $(this).find('.suit').first().text();
+                code = $(this).data('card');
+                card = getCard(code);
+
+                removeCard(rank, suit, rank);
+                removeCard(rank, suit, suit);
+                addCard(ranks['random'], suits['random'], ranks['random']);
+                addCard(ranks['random'], suits['random'], suits['random']);
+
+                card.num = ranks['random'];
+                card.suit = suits['random'];
+                $(this).css('color', 'black');
+                updateCard(code); //doesnt change the actual player PLayers[player] so the player still has the old rank and suit
+            });
+
+            $('#' + CURRENT_PLAYERS).hide();
+            CURRENT_PLAYERS --;
+        }
+    });
+
     $("main").on("click", function() {
         $('.selectors').hide();
         $(".selected").removeClass("selected");
@@ -150,23 +187,15 @@ $(document).ready(function() {
             return;
         }
 
-        if (cardsInPlay[rank + visualCard.find('suit').first().text()] == true) {
+        if (cardsInPlay[rank + oldSuit] == true) {
             return;
         }
 
-        cardsInPlayCount[oldRank] --;
-        cardsInPlayCount[rank] ++;
-
-        if (oldRank != ranks.random && oldSuit != suits.random) {
-            cardsInPlay[oldRank + oldSuit] = false;
-        }
+        addCard(rank, oldSuit, rank);
+        removeCard(oldRank, oldSuit, oldRank);
 
         card.num = rank;
         updateCard(code);
-
-        if (rank != ranks.random && oldSuit != ranks.random) {
-            cardsInPlay[rank + oldSuit] = true;
-        }
 
     });
 
@@ -182,218 +211,195 @@ $(document).ready(function() {
             return;
         }
 
-        if (cardsInPlay[visualCard.find('rank').first().text() + suit] == true) {
+        if (cardsInPlay[oldRank + suit] == true) {
             return;
         }
 
-        cardsInPlayCount[oldSuit] --;
-        cardsInPlayCount[suit] ++;
-
-        if (oldRank != ranks.random && oldSuit != suits.random) {
-            cardsInPlay[oldRank + oldSuit] = false;
-        }
+        addCard(oldRank, suit, suit);
+        removeCard(oldRank, oldSuit, oldSuit);
 
         card.suit = suit;
         updateCard(code);
 
         visualCard.css('color', $(this).css('color'));
 
-        if (oldRank != ranks.random && suit != ranks.random) {
-            console.log(oldRank + suit);
-            console.log(cardsInPlay[oldRank + suit]);
-            cardsInPlay[oldRank + suit] = true;
+    });
+
+     $(".calculate").on("click", function() {
+         calculateWinPercentages();
+        for (var i = 1; i <= CURRENT_PLAYERS; i++) {
+            $('#' + i).find('.winRate').text('Win %: ' + players['player' + i].winRate);
+            $('#' + i).find('.tieRate').text('Tie %: ' + players['player' + i].tieRate);
         }
-
-    });
+     });
 
 
 });
 
-var cardSelect = false,
-    playerSelect = false;
-
-$(document).ready(function() {
-    $(".cardGroup").on("click", ".card:not(.selected):not(.inPlay)", function() {
-        cardSelect = true;
-        $(".cardGroup").find(".selected").removeClass("selected");
-        $(this).addClass("selected");
-        if (playerSelect) {
-            var card = $(this);
-            var position = $("main").find(".selected");
-            if (position.data("card") != null) {
-                removeCard($(".cardGroup").find(position.data("card")), position);
-            }
-            addCard(card, position);
-            cardSelect = false;
-            playerSelect = false;
-        }
-    });
-});
-
-$(document).ready(function() {
-    $(".cardGroup").on("click", ".selected:not(.inPlay)", function() {
-        cardSelect = false;
-        $(".selected").removeClass("selected");
-    });
-});
-
-$(document).ready(function() {
-    $("main").on("click", ".card:not(.selected)", function() {
-
-        if (playerSelect) {
-
-
-            var position,
-                prevPosition,
-                card = false,
-                prevCard = false;
-
-            prevPosition = $("main").find(".selected");
-            if (prevPosition.data('card')) {
-                prevCard = $('.cardRow').find(prevPosition.data('card'));
-                removeCard(prevCard, prevPosition);
-            }
-
-            var position = $(this);
-            if (position.data('card')) {
-                var card = $('.cardRow').find(position.data('card'));
-                removeCard(card, position);
-            }
-
-            if (prevCard) {
-                addCard(prevCard, position);
-            }
-            if (card) {
-                addCard(card, prevPosition);
-            }
-
-            playerSelect = false;
-
-            if (!card && !prevCard) {
-                $("main").find(".selected").removeClass("selected");
-                $(this).addClass("selected");
-                playerSelect = true;
-            }
-
-        } else {
-            playerSelect = true;
-            $("main").find(".selected").removeClass("selected");
-            $(this).addClass("selected");
-            if (cardSelect) {
-                var position = $(this);
-                if ($(this).data("card") != null) {
-                    removeCard($(".cardGroup").find($(this).data("card")), position);
-                }
-                addCard($(".cardGroup").find(".selected"), position);
-                cardSelect = false;
-                playerSelect = false;
-            }
-        }
-    });
-});
-
-$(document).ready(function() {
-    $("main").on("click", ".selected", function() {
-        playerSelect = false;
-        $(".selected").removeClass("selected");
-    });
-});
-
-function addCard(card, position) {
-
-    var inPlay = card.data("card"); //information of new card
-    var cardIndex = parseInt(inPlay.charAt(1) * 13) + parseInt(inPlay.substring(2)); // Index of new card in cards array
-    var positionData = position.data("position");
-
-    deck[cardIndex].inPlay = true;
-
-    card.removeClass("selected");
-    var cardClone = card.clone(true);
-    card.addClass("inPlay");
-    cardClone.css('width', $('.cardRow .card').css('width'));
-    cardClone.find('.remove').show()
-
-    cardClone.data("position", positionData);
-
-    position.replaceWith(cardClone);
-
-
-    if (positionData.substring(2) == "player") {
-        players[positionData.charAt(0)].cards[positionData.charAt(1)] = deck[cardIndex];
-    } else {
-        community[positionData.charAt(0)] = deck[cardIndex];
-    }
-
-
-    //position.css('width', $('.cardRow .card').css('width'));
-    cardClone.css('visibility', 'visible');
-}
-
-function removeCard(card, position) {
-
-    position.removeData("card");
-
-    position.removeClass();
-    position.addClass("card");
-
-    position.empty();
-
-
-    card.removeClass("inPlay");
-
-    var cardData = card.data("card"), //information of new card
-        cardIndex = parseInt(cardData.charAt(1) * 13) + parseInt(cardData.substring(2)),
-        positionData = position.data("position");
-
-    deck[cardIndex].inPlay = false;
-
-    if (positionData.substring(2) == "player") {
-        players[positionData.charAt(0)].cards[positionData.charAt(1)] = randCard;
-    } else {
-        community[positionData.charAt(0)] = randCard;
-    }
-}
-
-$(document).ready(function() {
-    $(".calculate").on("click", function() {
-        //$('.overlay').show();
-        //$('.loadingBar').show();
-        outcome = calculateWinPercentage (100000);
-        $('.winRate').text("Win: " + outcome[0] + "%");
-        $('.tieRate').text("Tie: " + outcome[1] + "%");
-        //  $('.overlay').hide();
-        //  $('.loadingBar').hide();
-    });
-});
-
-$(document).ready(function() {
-    $(document).on("click", ".card .remove", function() {
-        var position = $(this).parent();
-        if (position.hasClass('selected')) {
-            playerSelect = false;
-        }
-        removeCard($(".cardGroup").find(position.data("card")), position);
-
-    });
-});
-
-$(document).ready(function() {
-    $(document).on("click", ".remove-player", function() {
-
-        $(this).find('p').text('+').css('top', '45%');
-        $(this).removeClass('remove-player').addClass('add-player');
-
-        var player = $(this).parent();
-        players[player.data("player")].inPlay = false;
-        if (player.find('.card').hasClass('selected')) {
-            playerSelect = false;
-        }
-        player.find(".card").each(function() {
-            $(this).removeClass('selected');
-            if ($(this).data('card') != null) {
-                removeCard($(".cardGroup").find($(this).data("card")), $(this));
-            }
-            $(this).css('visibility', 'hidden');
-        });
-    });
-});
+// var cardSelect = false,
+//     playerSelect = false;
+//
+// $(document).ready(function() {
+//     $(".cardGroup").on("click", ".card:not(.selected):not(.inPlay)", function() {
+//         cardSelect = true;
+//         $(".cardGroup").find(".selected").removeClass("selected");
+//         $(this).addClass("selected");
+//         if (playerSelect) {
+//             var card = $(this);
+//             var position = $("main").find(".selected");
+//             if (position.data("card") != null) {
+//                 removeCard($(".cardGroup").find(position.data("card")), position);
+//             }
+//             addCard(card, position);
+//             cardSelect = false;
+//             playerSelect = false;
+//         }
+//     });
+// });
+//
+// $(document).ready(function() {
+//     $(".cardGroup").on("click", ".selected:not(.inPlay)", function() {
+//         cardSelect = false;
+//         $(".selected").removeClass("selected");
+//     });
+// });
+//
+// $(document).ready(function() {
+//     $("main").on("click", ".card:not(.selected)", function() {
+//
+//         if (playerSelect) {
+//
+//
+//             var position,
+//                 prevPosition,
+//                 card = false,
+//                 prevCard = false;
+//
+//             prevPosition = $("main").find(".selected");
+//             if (prevPosition.data('card')) {
+//                 prevCard = $('.cardRow').find(prevPosition.data('card'));
+//                 removeCard(prevCard, prevPosition);
+//             }
+//
+//             var position = $(this);
+//             if (position.data('card')) {
+//                 var card = $('.cardRow').find(position.data('card'));
+//                 removeCard(card, position);
+//             }
+//
+//             if (prevCard) {
+//                 addCard(prevCard, position);
+//             }
+//             if (card) {
+//                 addCard(card, prevPosition);
+//             }
+//
+//             playerSelect = false;
+//
+//             if (!card && !prevCard) {
+//                 $("main").find(".selected").removeClass("selected");
+//                 $(this).addClass("selected");
+//                 playerSelect = true;
+//             }
+//
+//         } else {
+//             playerSelect = true;
+//             $("main").find(".selected").removeClass("selected");
+//             $(this).addClass("selected");
+//             if (cardSelect) {
+//                 var position = $(this);
+//                 if ($(this).data("card") != null) {
+//                     removeCard($(".cardGroup").find($(this).data("card")), position);
+//                 }
+//                 addCard($(".cardGroup").find(".selected"), position);
+//                 cardSelect = false;
+//                 playerSelect = false;
+//             }
+//         }
+//     });
+// });
+//
+// $(document).ready(function() {
+//     $("main").on("click", ".selected", function() {
+//         playerSelect = false;
+//         $(".selected").removeClass("selected");
+//     });
+// });
+//
+// function addCard(card, position) {
+//
+//     var inPlay = card.data("card"); //information of new card
+//     var cardIndex = parseInt(inPlay.charAt(1) * 13) + parseInt(inPlay.substring(2)); // Index of new card in cards array
+//     var positionData = position.data("position");
+//
+//     deck[cardIndex].inPlay = true;
+//
+//     card.removeClass("selected");
+//     var cardClone = card.clone(true);
+//     card.addClass("inPlay");
+//     cardClone.css('width', $('.cardRow .card').css('width'));
+//     cardClone.find('.remove').show()
+//
+//     cardClone.data("position", positionData);
+//
+//     position.replaceWith(cardClone);
+//
+//
+//     if (positionData.substring(2) == "player") {
+//         players[positionData.charAt(0)].cards[positionData.charAt(1)] = deck[cardIndex];
+//     } else {
+//         community[positionData.charAt(0)] = deck[cardIndex];
+//     }
+//
+//
+//     //position.css('width', $('.cardRow .card').css('width'));
+//     cardClone.css('visibility', 'visible');
+// }
+//
+// function removeCard(card, position) {
+//
+//     position.removeData("card");
+//
+//     position.removeClass();
+//     position.addClass("card");
+//
+//     position.empty();
+//
+//
+//     card.removeClass("inPlay");
+//
+//     var cardData = card.data("card"), //information of new card
+//         cardIndex = parseInt(cardData.charAt(1) * 13) + parseInt(cardData.substring(2)),
+//         positionData = position.data("position");
+//
+//     deck[cardIndex].inPlay = false;
+//
+//     if (positionData.substring(2) == "player") {
+//         players[positionData.charAt(0)].cards[positionData.charAt(1)] = randCard;
+//     } else {
+//         community[positionData.charAt(0)] = randCard;
+//     }
+// }
+//
+// $(document).ready(function() {
+//     $(".calculate").on("click", function() {
+//         //$('.overlay').show();
+//         //$('.loadingBar').show();
+//         outcome = calculateWinPercentage (100000);
+//         $('.winRate').text("Win: " + outcome[0] + "%");
+//         $('.tieRate').text("Tie: " + outcome[1] + "%");
+//         //  $('.overlay').hide();
+//         //  $('.loadingBar').hide();
+//     });
+// });
+//
+// $(document).ready(function() {
+//     $(document).on("click", ".card .remove", function() {
+//         var position = $(this).parent();
+//         if (position.hasClass('selected')) {
+//             playerSelect = false;
+//         }
+//         removeCard($(".cardGroup").find(position.data("card")), position);
+//
+//     });
+// });

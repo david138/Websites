@@ -5,7 +5,8 @@
 
 var NUM_PLAYERS = 6;
 var INITIAL_PLAYERS = 2;
-var ROUNDS = 100000;
+var CURRENT_PLAYERS = INITIAL_PLAYERS;
+var ROUNDS = 10;
 
 /*
   A playing card, it contains a number and a suit.
@@ -152,7 +153,7 @@ function HandStrength(cards) {
     // Checks for matches
     var matches = checkMatches(cards);
 
-    switch(outcome[0]) {
+    switch(matches[0]) {
         case 1:
            // this.handtype = "High Card";
             this.strength = 100000
@@ -212,13 +213,12 @@ function HandStrength(cards) {
 function sortHand(cards) {
     var temp, i, j;
 
-    for (i = 0; i < 7; i++) {
-        temp = cards[i + 1];
-        for (j = i + 1; j > 0; j--) {
-            if (temp.num > cards[j - 1].num) {
+    for (i = 1; i < cards.length; i++) {
+        temp = cards[i];
+        for (j = i; j > 0; j--) {
+            if (parseInt(temp.num) > parseInt(cards[j - 1].num)) {
                 cards[j] = cards[j - 1];
-            }  else {
-                cards[j] = temp;
+                cards[j - 1] = temp;
             }
         }
     }
@@ -391,52 +391,50 @@ function checkHand (handStrength1, handStrength2) {
    Interacts directly with players winRate and tieRate attributes.
  */
 function calculateWinPercentages () {
-    var playersPlaying = [], // Players currently playing
-        round, //current round being simulated
+        var round, //current round being simulated
         r,
-        communityCards = [], // array which stores the community cards
         curPlayer, // player whose cards are currently being checked
+        curComp = [],
         winningPlayers, // array of currently winning players
         strengthOutcome; // outcome of calculateStrength function calls
 
-    /*
-       Creates array of players currently playing and resets the win and tie rates
-     */
-    for (var i = 1; i <= NUM_PLAYERS; i++) {
-        if (players["player" + i].inPlay) {
-            players["player" + i].tieRate = 0;
-            players["player" + i].winRate = 0;
-            playersPlaying.push(players["player" + i]);
-        }
+    for (r = 1; r <= CURRENT_PLAYERS; r++) {
+        curPlayer = players['player' + r];
+        curPlayer.winRate = 0;
+        curPlayer.tieRate = 0;
     }
+
 
     // simulates ROUNDS rounds of show downs
     for (round = 0; round < ROUNDS; round ++) {
 
         // generates random cards for each player that needs it
-        for (r = 0; r < playersPlaying.length; r++) {
-            playersPlaying[r].randomCard0 = createRandomCard(playersPlaying[r].card1);
-            playersPlaying[r].randomCard1 = createRandomCard(playersPlaying[r].card2);
+        for (r = 1; r <= CURRENT_PLAYERS; r++) {
+            curPlayer = players['player' + r];
+            curPlayer.randomCard1 = createRandomCard(curPlayer.card1);
+            curPlayer.randomCard2 = createRandomCard(curPlayer.card2);
         }
 
         // generates random community cards
-        for (r = 0; r < community.length; r++) {
+        for (r = 1; r <= 5; r++) {
             community["randomCard" + r] = createRandomCard(community["card" + r]);
-            communityCards.push(community["randomCard" + r]);
         }
 
         // calculate initial players hand strength
-        playersPlaying[0].handStrength =
-            new HandStrength([playersPlaying[0].randomCard0, playersPlaying[0].randomCard1].concat(communityCards));
+        curPlayer = players['player1'];
+        curComp = [curPlayer.randomCard1, curPlayer.randomCard2, community.randomCard1, community.randomCard2,
+            community.randomCard3, community.randomCard4, community.randomCard5];
 
-        winningPlayers = [playersPlaying[0]]; // add player to winners
+        curPlayer.handStrength = new HandStrength(curComp);
 
+        winningPlayers = [players['player' + 1]]; // add player to winners
 
         // loops through each player to find player with best hand
-        for (r = 1; r < playersPlaying.length; r ++) {
-            curPlayer = playersPlaying[r];
-            curPlayer.handStrength =
-                new HandStrength([curPlayer.randomCard0, curPlayer.randomCard1].concat(communityCards));
+        for (r = 2; r <= CURRENT_PLAYERS; r++) {
+            curPlayer = players['player' + r];
+            curComp = [curPlayer.randomCard1, curPlayer.randomCard2, community.randomCard1, community.randomCard2,
+                community.randomCard3, community.randomCard4, community.randomCard5];
+            curPlayer.handStrength = new HandStrength(curComp);
             strengthOutcome = checkHand(winningPlayers[0].handStrength, curPlayer.handStrength);
 
             if (strengthOutcome == 2) {
@@ -446,22 +444,21 @@ function calculateWinPercentages () {
             }
         }
 
-
         // add wins or ties to players with best hands
         if (winningPlayers.length == 1) {
             winningPlayers[0].winRate ++;
         } else {
-            for (r = 0; r < winningPlayers.length; r ++) {
+            for (r = 0; r < winningPlayers.length; r++) {
                 winningPlayers[r].tieRate ++;
             }
         }
-
         removeRandomCards();
     }
 
-    for (r = 0; r < playersPlaying.length; r ++) {
-        playersPlaying[r].winRate = playersPlaying[r].winRate / ROUNDS;
-        playersPlaying[r].tieRate = playersPlaying[r].tieRate / ROUNDS;
+    for (r = 1; r <= CURRENT_PLAYERS; r++) {
+        curPlayer = players['player' + r];
+        curPlayer.winRate = curPlayer.winRate / ROUNDS;
+        curPlayer.tieRate = curPlayer.tieRate / ROUNDS;
     }
 }
 
