@@ -132,6 +132,7 @@ header {
 }
 
 footer {
+    position: relative;
     float: left;
     width: 100%;
     text-align: center;
@@ -534,6 +535,15 @@ input {
 
 .ranks > p:hover, .suits > p:hover, .broadways > p:hover {
     background-color: hsl(330, 6%, 80%);
+}
+
+#loadingBar {
+    position: absolute;
+    top: -5px;
+    height: 5px;
+    background-color: lightskyblue;
+    width: 0;
+    z-index: 100;
 }
 
 @media only screen and (max-width: 1300px) {
