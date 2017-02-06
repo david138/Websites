@@ -1,5 +1,5 @@
 /**
- * Created by luked on 4/28/2016.
+ * This file contains the back-end Javascript code for the Poker Calculator.
  */
 
 
