@@ -506,7 +506,7 @@ input {
 
 #loadingBar {
     position: absolute;
-    top: -5px;
+    top: 0px;
     height: 5px;
     background-color: lightskyblue;
     width: 0;
@@ -673,8 +673,8 @@ input {
     }
 
     #loadingBar {
-        height: 2px;
-        top: -2px;
+        height: 4px;
+        top: 0px;
     }
 }
 

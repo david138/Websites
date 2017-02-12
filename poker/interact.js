@@ -5,6 +5,11 @@
 
 $(document).ready(function() {
 
+    var INITIAL_PLAYERS = 1;
+    var CURRENT_PLAYERS = INITIAL_PLAYERS;
+    var MAX_PLAYERS = 5;
+    var ITERATIONS = 5000;
+
     /*
        Gives cards initial rank and suit.
      */
@@ -12,45 +17,21 @@ $(document).ready(function() {
     var mid = $("<div class = 'mid rank'></div>");
     var bot = $("<div class = 'bot'> <div class='rank'> </div> <div class='suit'> </div> </div>");
     $('.card').append(top).append(mid).append(bot);
-    updateCard("11c");
-    updateCard("12c");
-    updateCard("21c");
-    updateCard("22c");
-    updateCard("31c");
-    updateCard("32c");
-    updateCard("41c");
-    updateCard("42c");
-    updateCard("51c");
-    updateCard("52c");
-    updateCard("61c");
-    updateCard("62c");
-
-    updateCard("c1");
-    updateCard("c2");
-    updateCard("c3");
-    updateCard("c4");
-    updateCard("c5");
+    $('.card').find('.rank').text(convertSymbol(Rank.Unknown));
+    $('.card').find('.suit').text(convertSymbol(Suit.Unknown));
 
     /*
        Sets up initial selector panel, which displays when user selects a card.
      */
-    for (var rank in ranks) {
-        if (ranks[rank] <= 10) {
-            $('.ranks').append('<p>' + ranks[rank] + '</p>');
-        } else if (ranks[rank] == '11') {
-            $('.broadways').append('<p>' + 'J' + '</p>');
-        } else if (ranks[rank] == '12') {
-            $('.broadways').append('<p>' + 'Q' + '</p>');
-        } else if (ranks[rank] == '13') {
-            $('.broadways').append('<p>' + 'K' + '</p>');
-        } else if (ranks[rank] == '14') {
-            $('.broadways').append('<p>' + 'A' + '</p>');
+    for (var rank in Rank) {
+        if (Rank[rank] <= 10) {
+            $('.ranks').append('<p>' + Rank[rank] + '</p>');
         } else {
-            $('.broadways').append('<p>' + ranks[rank] + '</p>');
+            $('.broadways').append('<p>' + convertSymbol(Rank[rank]) + '</p>');
         }
     }
-    for (var suit in suits) {
-        $('.suits').append('<p>' + suits[suit] + '</p>');
+    for (var suit in Suit) {
+        $('.suits').append('<p>' + convertSymbol(Suit[suit]) + '</p>');
     }
     $('.selectors').hide();
 
@@ -58,7 +39,7 @@ $(document).ready(function() {
     /*
        Hides additional players.
      */
-    for (var i = 1; i <= NUM_PLAYERS; i++) {
+    for (var i = 0; i <= MAX_PLAYERS; i++) {
         if (i > INITIAL_PLAYERS) {
             $('#' + i).hide();
         }
@@ -69,10 +50,9 @@ $(document).ready(function() {
        adds player.
      */
     $(document).on("click", ".add-player", function() {
-        if (CURRENT_PLAYERS < NUM_PLAYERS) {
-            CURRENT_PLAYERS ++;
+        if (CURRENT_PLAYERS < MAX_PLAYERS) {
+            CURRENT_PLAYERS++;
             $('#' + CURRENT_PLAYERS).show();
-            players["player" + CURRENT_PLAYERS].inPlay = true;
         }
     });
 
@@ -80,31 +60,14 @@ $(document).ready(function() {
      Triggered when Remove Player button is clicked,
      removes player.
      */
-    $(document).on("click", ".remove-player", function() { //function doesnt work suits not being converted
+    $(document).on("click", ".remove-player", function() {
+
         if (CURRENT_PLAYERS > INITIAL_PLAYERS) {
-            players["player" + CURRENT_PLAYERS].inPlay = false;
-
-            var rank, suit, code, card;
-
-            $('#' + CURRENT_PLAYERS).find('.card').each(function() {
-                rank = convertSymbol($(this).find('.rank').first().text());
-                suit = $(this).find('.suit').first().text();
-                code = $(this).data('card');
-                card = getCard(code);
-
-                removeCard(rank, suit, rank);
-                removeCard(rank, suit, suit);
-                addCard(ranks['random'], suits['random'], ranks['random']);
-                addCard(ranks['random'], suits['random'], suits['random']);
-
-                card.num = ranks['random'];
-                card.suit = suits['random'];
-                $(this).css('color', 'black');
-                updateCard(code); //doesnt change the actual player PLayers[player] so the player still has the old rank and suit
-            });
-
+            $('#' + CURRENT_PLAYERS).find('.card').find('.rank').text(convertSymbol(Rank.Unknown));
+            $('#' + CURRENT_PLAYERS).find('.card').find('.suit').text(convertSymbol(Suit.Unknown));
+            $('#' + CURRENT_PLAYERS).find('.card').css('color', 'black').removeClass().addClass('card');
             $('#' + CURRENT_PLAYERS).hide();
-            CURRENT_PLAYERS --;
+            CURRENT_PLAYERS--;
         }
     });
 
@@ -131,28 +94,18 @@ $(document).ready(function() {
        the new rank.
      */
     $('.ranks, .broadways').on("click", "p", function() {
-        var rank = convertSymbol($(this).text()),
-            visualCard = $('.selected'),
-            code = visualCard.data('card'),
-            card = getCard(code),
-            oldRank = convertSymbol(visualCard.find('.rank').first().text()),
-            oldSuit = visualCard.find('.suit').first().text();
+        var $card = $('.selected'),
+            oldRank = convertSymbol($card.find('.rank').first().text()),
+            newRank = convertSymbol($(this).text()),
+            suit = convertSymbol($card.find('.suit').first().text());
 
-        if (cardsInPlayCount[rank] >= 4 || cardsInPlay[rank + oldSuit] == true) {
-            invalidChoice($(this));
-            return;
-        }
-
-        addCard(rank, oldSuit, rank);
-        removeCard(oldRank, oldSuit, oldRank);
-        
-        if (rank == ranks["random"]) {
-            card.num = rank;
+        if (newRank === Rank.Unknown) {
+            $card.removeClass(oldRank).find('.rank').text('?');
+        } else if ($('.' + newRank).length < 4 && $('.' + newRank + '.' + suit).length === 0) {
+            $card.removeClass(oldRank).addClass(newRank).find('.rank').text($(this).text());
         } else {
-            card.num = parseInt(rank);
+            invalidChoice($(this));
         }
-        updateCard(code);
-
     });
 
     /*
@@ -160,26 +113,20 @@ $(document).ready(function() {
      the new suit.
      */
     $('.suits').on("click", "p", function() {
-        var suit = $(this).text(),
-            visualCard = $('.selected'),
-            code = visualCard.data('card'),
-            card = getCard(code),
-            oldRank = convertSymbol(visualCard.find('.rank').first().text()),
-            oldSuit = visualCard.find('.suit').first().text();
+        var $card = $('.selected'),
+            oldSuit = convertSymbol($card.find('.suit').first().text()),
+            newSuit = convertSymbol($(this).text()),
+            rank = convertSymbol($card.find('.rank').first().text());
 
-        if (cardsInPlayCount[rank] >= 13 || cardsInPlay[oldRank + suit] == true) {
+        if (newSuit === Suit.Unknown) {
+            $card.removeClass(oldSuit).find('.suit').text('?');
+            $card.css('color', $(this).css('color'));
+        } else if ($('.' + newSuit).length < 13 && $('.' + rank + '.' + newSuit).length === 0) {
+            $card.removeClass(oldSuit).addClass(newSuit).find('.suit').text($(this).text());
+            $card.css('color', $(this).css('color'));
+        } else {
             invalidChoice($(this));
-            return;
         }
-
-        addCard(oldRank, suit, suit);
-        removeCard(oldRank, oldSuit, oldSuit);
-
-        card.suit = suit;
-        updateCard(code);
-
-        visualCard.css('color', $(this).css('color'));
-
     });
 
     /*
@@ -187,132 +134,79 @@ $(document).ready(function() {
      */
      $(".calculate").on("click", function() {
 
-         var i, winRate, tieRate;
+         var board = new Board(), i, j, results = [], tempResults = [];
 
-         for (i = 1; i <= CURRENT_PLAYERS; i++) {
-             players['player' + i].winRate = 0;
-             players['player' + i].tieRate = 0;
+         for (i = 0; i <= CURRENT_PLAYERS; i++) {
+             board.addPlayer();
+             results.push({wins: 0, ties: 0});
+             j = 0;
+             $('#' + i).find('.card').each(function () {
+                 board.setPlayerCard(i, j, convertSymbol($(this).find('.rank').first().text()),
+                     convertSymbol($(this).find('.suit').first().text()));
+                 j++;
+             });
          }
 
-         updateRates(.1, .1);
+         j = 0;
+         $('.game-board').find('.card').each(function () {
+             board.setCommunityCard(j, convertSymbol($(this).find('.rank').first().text()),
+                 convertSymbol($(this).find('.suit').first().text()));
+             j++;
+         });
 
-         setTimeout(function () {
-             updateRates(.2, .1);
-             setTimeout(function () {
-                 updateRates(.3, .1);
-                 setTimeout(function () {
-                     updateRates(.4, .1);
-                     setTimeout(function () {
-                         updateRates(.5, .1);
-                         setTimeout(function () {
-                             updateRates(.6, .1);
-                             setTimeout(function () {
-                                 updateRates(.7, .1);
-                                 setTimeout(function () {
-                                     updateRates(.8, .1);
-                                     setTimeout(function () {
-                                         updateRates(.9, .1);
-                                         setTimeout(function () {
-                                             updateRates(1, .1);
-                                         }, 200);
-                                     }, 200);
-                                 }, 200);
-                             }, 200);
-                         }, 200);
-                     }, 200);
-                 }, 200);
-             }, 200);
-         }, 200);
+         var loadingBar = $('#loadingBar');
+         var percentDone = 0;
+         var id = setInterval(frame, 100);
+
+         function frame() {
+             if (percentDone === 100) {
+                 clearInterval(id);
+                 for (var i = 0; i <= CURRENT_PLAYERS; i++) {
+                     $('#' + i).find('.winRate').text('Win %: ' + (results[i].wins / ITERATIONS * 10).toFixed(2));
+                     $('#' + i).find('.tieRate').text('Tie %: ' + (results[i].ties / ITERATIONS * 10).toFixed(2));
+                 }
+             } else {
+                 percentDone += 10;
+                 loadingBar.css('width', percentDone + '%');
+                 tempResults = getOddsPerPlayer(board, ITERATIONS);
+                 for (i = 0; i < results.length; i++) {
+                     results[i].wins += tempResults[i].wins;
+                     results[i].ties += tempResults[i].ties;
+                 }
+             }
+         }
+
      });
-
-    /*
-       Updates loading bar and winRate and tieRate of players.
-     */
-    function updateRates(percentDone, percent) {
-        calculateWinPercentages(ROUNDS * percent);
-        for (var i = 1; i <= CURRENT_PLAYERS; i++) {
-
-            $('#' + i).find('.winRate').text('Win %: ' +
-                Math.round(players['player' + i].winRate / (ROUNDS * percentDone) * 10000) / 100);
-
-            $('#' + i).find('.tieRate').text('Tie %: ' +
-                Math.round(players['player' + i].tieRate / (ROUNDS * percentDone) * 10000) / 100);
-        }
-        $('#loadingBar').css('width', percentDone * 100 + '%');
-    }
-
-    /*
-       Updates the information on cards visual cards.
-     */
-    function updateCard(code) {
-        var rank = convertSymbol(getCard(code).num),
-            suit = getCard(code).suit;
-
-
-        $('#' + code).find('.rank').text(rank);
-        $('#' + code).find('.suit').text(suit);
-    }
-
-    /*
-       returns the card object represented by the given code.
-     */
-    function getCard(code) {
-        if(code[0] == 'c') {
-            return community["card" + code[1]];
-        } else {
-            return players["player" + code[0]]["card" + code[1]];
-        }
-    }
-
-    /*
-       Puts a given card in play.
-     */
-    function addCard(rank, suit, removeType) {
-        cardsInPlayCount[removeType] ++;
-        if (rank != ranks.random && suit != ranks.random) {
-            cardsInPlay[rank + suit] = true;
-        }
-    }
-
-    /*
-       Removes a card from play.
-     */
-    function removeCard(rank, suit, removeType) {
-        cardsInPlayCount[removeType] --;
-        if (rank != ranks.random && suit != suits.random) {
-            cardsInPlay[rank + suit] = false;
-        }
-    }
 
     /*
        Converts symbols from their text representation to their
        visual representation.
      */
     function convertSymbol(symbol) {
-        if (symbol == "11") {
+        if (symbol === "11") {
             return "J";
-        } else if (symbol == "12") {
+        } else if (symbol === "12") {
             return "Q";
-        } else if (symbol == "13") {
+        } else if (symbol === "13") {
             return "K";
-        } else if (symbol == "14") {
+        } else if (symbol === "14") {
             return "A";
-        } else if (symbol == "J") {
+        } else if (symbol === "J") {
             return "11";
-        } else if (symbol == "Q") {
+        } else if (symbol === "Q") {
             return "12";
-        } else if (symbol == "K") {
+        } else if (symbol === "K") {
             return "13";
-        } else if (symbol == "A") {
+        } else if (symbol === "A") {
             return "14";
-        } else if (symbol == '♥') {
-            return '&hearts;';
-        } else if (symbol == '♣') {
-            return '&clubs;';
-        } else if (symbol == '♦') {
-            return '&diams;';
-        } else if (symbol == '♠') {
-            return '&spades;';
+        } else if (symbol === Rank.Unknown) {
+            return '?';
+        } else if (symbol === '?') {
+            return Rank.Unknown;
+        } else if (symbol === Suit.Unknown) {
+            return '?';
+        } else if (symbol === '?') {
+            return Suit.Unknown;
         }
         return symbol;
     }
@@ -324,8 +218,8 @@ $(document).ready(function() {
         var pos = 0;
         var id = setInterval(frame, 10);
         function frame() {
-            if (pos == 20) {
-                choice.css('background-color', 'hsl(330, 6%, 95%)');
+            if (pos === 20) {
+                choice.css('background-color', '');
                 clearInterval(id);
             } else {
                 pos++;

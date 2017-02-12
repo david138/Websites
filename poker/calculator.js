@@ -3,74 +3,37 @@
  */
 
 
-var NUM_PLAYERS = 6; // Maximum number of players
-var INITIAL_PLAYERS = 2; 
-var CURRENT_PLAYERS = INITIAL_PLAYERS;
-var ROUNDS = 50000; // Number of times the poker scenario is simulated
-
-/*
-  A playing card, it contains a number and a suit.
- */
-function Card(num, suit) {
-
-    this.num = num;
-    this.suit = suit;
-}
+var STRENGTH_CONSTANT = 100;
 
 /*
   Possible ranks on a card.
  */
-var ranks = {two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10,
-               jack: 11, queen: 12, king: 13, ace: 14, random: '?'};
+var Rank = {Two: 2, Three: 3, Four: 4, Five: 5, Six: 6, Seven: 7, Eight: 8, Nine: 9, Ten: 10,
+               Jack: 11, Queen: 12, King: 13, Ace: 14, Unknown: 'u'};
 
 /*
   Possible suits on a card.
  */
-var suits = {hearts: "♥", clubs: "♣", diamonds: "♦", spades: "♠", random: "?"};
+var Suit = {Hearts: "♥", Clubs: "♣", Diamonds: "♦", Spades: "♠", Unknown: "u"};
+
+var HandType = {HighCard: 1, Pair: 2, TwoPair: 3, Triple: 4, Straight: 5, Flush: 6, FullHouse: 7, Quad: 8,
+                 StraightFlush: 9};
 
 
 /*
-  Dictionairy that holds all in hands and on board.
-  Key: rank + suit of card
-  Value: returns true if card is true, false otherwise.
+ A playing card, it contains a rankber and a suit.
  */
-var cardsInPlay = {};
-
-/*
-  This dictionairy will hold all the random cards in play.
-  Key: rank + suit of card
-  Value: returns true if card is true, false otherwise.
- */
-var randomCardsInPlay = {};
-
-/*
-  This dictionary will give a count of each rank and suit in play,
-  it is useful for partially complete cards.
- */
-var cardsInPlayCount = {};
-
-var tempAdditions = {}; //temporary additions to cardsInPlayCount from random cards
-
-
-/*
-  Adds all possible cards to cardsInPlay and randomCardsInPlay and sets them to false (out of play)
-*/
-for (var rank in ranks) {
-    for (var suit in suits) {
-
-        cardsInPlay[ranks[rank] + suits[suit]] = false;
-        //randomCardsInPlay[ranks[rank] + suits[suit]] = false; perhaps only put random cards in array to begin with
-    }
+function Card(value, suit) {
+    this.rank = value || Rank.Unknown;
+    this.suit = suit || Suit.Unknown;
+    this.id = this.value + this.suit;
 }
 
 /*
-   Add each rank and suit to the cards in play count and set each to 0.
+   A players hand, contains an array of the players cards.
  */
-for (var rank in ranks) {
-    cardsInPlayCount[ranks[rank]] = 0;
-}
-for (var suit in suits) {
-    cardsInPlayCount[suits[suit]] = 0;
+function Hand() {
+    this.cards = [new Card(), new Card()];
 }
 
 /*
@@ -79,205 +42,239 @@ for (var suit in suits) {
   HandStrength is the strength of the players current hand
  */
 function Player() {
-    this.card1 = new Card(ranks.random, suits.random);
-    this.card2 = new Card(ranks.random, suits.random);
-    this.inPlay = false;
-    this.winRate = "";
-    this.tieRate = "";
-    this.handStrength = 0;
-}
-
-
-/*
-   Creation of players.
- */
-var players = {};
-
-for (var player = 1; player <= NUM_PLAYERS; player ++) {
-    players["player" + player] = new Player();
-
-    if (player < INITIAL_PLAYERS) {
-        players["player" + player].inPlay = true;
+    if (typeof Player.counter === "undefined") {
+        Player.counter = 0;
     }
+    this.id = Player.counter++;
+    this.hand = new Hand();
 }
 
-/*
-   Creation of the community and it's five cards.
- */
-var community = {card1: new Card(ranks.random, suits.random), card2: new Card(ranks.random, suits.random),
-                 card3: new Card(ranks.random, suits.random), card4: new Card(ranks.random, suits.random),
-                 card5: new Card(ranks.random, suits.random)};
+$.extend(Player.prototype, {
+   addCard: function(cardSlot, card) {
+       this.hand.cards[cardSlot] = card;
+   }
+});
 
+/*
+   A board, contains all information on the table.
+ */
+function Board() {
+    this.players = []; // only players actually playing
+    this.communityCards = [];
+    this.cardsInPlayById = {};
+    this.playerStrengthById = [];
+    this.ranksInPlayCount = {};
+    this.suitsInPlayCount = {};
+}
+
+$.extend(Board.prototype, {
+
+    /*
+       Add new player to the board.
+     */
+    addPlayer: function () {
+        var player = new Player();
+        this.players.push(player);
+        return player;
+    },
+    setPlayerCard: function (playerId, cardSlot, rank, suit) {
+        this.players[playerId].addCard(cardSlot, new Card(rank, suit));
+
+        this.cardsInPlayById[this.players[playerId].hand.cards[cardSlot].id] = true;
+        this.ranksInPlayCount[rank] = this.ranksInPlayCount[rank] + 1 || 1;
+        this.suitsInPlayCount[suit] = this.suitsInPlayCount[suit] + 1 || 1;
+    },
+    setCommunityCard: function (cardSlot, rank, suit) {
+        this.communityCards[cardSlot] = new Card(rank, suit);
+
+        this.cardsInPlayById[this.communityCards[cardSlot].id] = true;
+        this.ranksInPlayCount[rank] = this.ranksInPlayCount[rank] + 1 || 1;
+        this.suitsInPlayCount[suit] = this.suitsInPlayCount[suit] + 1 || 1;
+    },
+    isCardInPlay: function (id) {
+        return this.cardsInPlayById[id] || false;
+    },
+    isRankAvailable: function(rank) {
+        return this.ranksInPlayCount[rank] < 4 || this.ranksInPlayCount[rank] === undefined;
+    },
+    isSuitAvailable: function(suit) {
+        return this.suitsInPlayCount[suit] < 13 || this.suitsInPlayCount[suit] === undefined;
+    },
+    setPlayerStrengths: function() {
+        for (var i = 0; i < this.players.length; i++) {
+            this.playerStrengthById.push(calculateStrength(this.players[i].hand.cards.concat(this.communityCards)));
+        }
+    },
+    getHighestStrengthPlayerIds: function() {
+        if (typeof this.playerStrengthById === "undefined") {
+            return -1;
+        }
+
+        var winningPlayers = [],
+            currentHighestStrength = 0;
+
+        for (var i = 0; i < this.playerStrengthById.length; i++) {
+            if (this.playerStrengthById[i] > currentHighestStrength) {
+                winningPlayers = [i];
+                currentHighestStrength = this.playerStrengthById[i];
+            } else if (this.playerStrengthById[i] === currentHighestStrength) {
+                winningPlayers.push(i);
+            }
+        }
+        return winningPlayers;
+
+    },
+    randomizeUnknownCards: function () {
+        var i, j;
+
+        for (i = 0; i < this.players.length; i++) {
+            for (j = 0; j < this.players[i].hand.cards.length; j++) {
+                this.randomizeCard(this.players[i].hand.cards[j]);
+            }
+        }
+        for (i = 0; i < this.communityCards.length; i++) {
+            this.randomizeCard(this.communityCards[i]);
+        }
+    },
+    randomizeCard: function(currentCard) {
+
+        var rank = currentCard.rank,
+            suit = currentCard.suit,
+            cardFound = (rank !== Rank.Unknown && suit !== Suit.Unknown),
+            randomCard = {},
+            randomRank = false,
+            randomSuit = false;
+        while (!cardFound) {
+            if (rank === Rank.Unknown) {
+                randomRank = true;
+                randomCard.rank = Rank[Object.keys(Rank)[Math.floor(13 * Math.random())]];
+                while (!this.isRankAvailable(randomCard.rank) && randomCard.rank !== Rank.Unknown) {
+                    randomCard.rank = Rank[Object.keys(Rank)[Math.floor(13 * Math.random())]];
+                }
+            }
+            if (suit === Suit.Unknown) {
+                randomSuit = true;
+                randomCard.suit = Suit[Object.keys(Suit)[Math.floor(4 * Math.random())]];
+                while (!this.isSuitAvailable(randomCard.suit) && randomCard.suit !== Suit.Unknown) {
+                    randomCard.suit = Suit[Object.keys(Suit)[Math.floor(4 * Math.random())]];
+                }
+            }
+            if (!this.isCardInPlay(randomCard.rank + randomCard.suit)) {
+                cardFound = true;
+
+                if (randomRank) {
+                    this.ranksInPlayCount[randomCard.rank] = this.ranksInPlayCount[randomCard.rank] + 1 || 1;
+                }
+                if (randomSuit) {
+                    this.suitsInPlayCount[randomCard.suit] = this.suitsInPlayCount[randomCard.suit] + 1 || 1;
+                }
+                currentCard.rank = randomCard.rank;
+                currentCard.suit = randomCard.suit;
+                currentCard.id = randomCard.rank + randomCard.suit;
+                this.cardsInPlayById[currentCard.id] = true;
+            }
+        }
+
+    },
+    resetCardsInPlay: function () {
+        this.cardsInPlayById = {};
+        this.playerStrengthById = [];
+        this.ranksInPlayCount = {};
+        this.suitsInPlayCount = {};
+    }
+});
 
 /*
    The strength of a players hand.
-
-   primaryStrength:
-    1: High Card
-    2: Pair
-    3: Double Pair
-    4: Three of a Kind
-    5: Straight
-    6: Flush
-    7: Full House
-    8: Four of a Kind
-    9: Straight Flush
-   secondStrength to sixthStrength:
-    The next most powerful attributes of the hand in descending order ex. the highest card in a flush
-    is secondStrength and the lowest card in a flush is sixthStrength.
  */
-function HandStrength(cards) {
+function calculateStrength(cards) {
 
-    // sort the cards by rank
-    cards = sortHand(cards);
+    var strength = 0, i;
 
     // Check for flush
-    var straight, flush = checkFlush(cards);
+    var flush = checkFlush(cards);
 
-    this.strength = [0, 0, 0, 0, 0, 0];
     // if flush...
     if (flush.length > 0) {
 
+        flush.sort(function(a, b){return b-a});
+
         // checks for straight flush
-        straight = checkStraight(flush);
+        var straight = checkStraight(flush);
 
         // if straight flush...
-        if (straight != 0) {
-       //     this.handType = "Straight Flush";
-            this.strength[0] = 9;
-            this.strength[1] = straight;
+        if (straight > 0) {
+            strength = HandType.StraightFlush;
+            strength *= STRENGTH_CONSTANT;
+            strength += straight;
+            strength *= Math.pow(STRENGTH_CONSTANT, 5);
 
         } else {
        //     this.handType = "Flush";
-            this.strength[0] = 6;
-            this.strength[1] = flush[0];
-            this.strength[2] = flush[1];
-            this.strength[3] = flush[2];
-            this.strength[4] = flush[3];
-            this.strength[5] = flush[4];
+            strength = HandType.Flush;
+            strength *= STRENGTH_CONSTANT;
+            for (i = 0; i < 5; i++) {
+                strength += flush[i];
+                strength *= STRENGTH_CONSTANT;
+            }
         }
-        return;
+        return strength;
     }
 
 
 
-    cards = [cards[0].num, cards[1].num, cards[2].num, cards[3].num, cards[4].num, cards[5].num, cards[6].num];
+    cards = [cards[0].rank, cards[1].rank, cards[2].rank, cards[3].rank, cards[4].rank, cards[5].rank, cards[6].rank];
+    cards.sort(function(a, b){return b-a});
 
     // Checks for straights
-    straight = checkStraight(cards);
+    var straight = checkStraight(cards);
 
-    if (straight[0]) {
+    if (straight > 0) {
        // this.handType = "Straight";
-        this.strength[0] = 5;
-        this.strength[1] = straight;
-        return;
+        strength = HandType.Straight;
+        strength *= STRENGTH_CONSTANT;
+        strength += straight;
+        strength *= Math.pow(STRENGTH_CONSTANT, 5);
+        return strength;
     }
 
 
     // Checks for matches
     var matches = checkMatches(cards);
 
-    switch(matches[0]) {
-        case 1:
-           // this.handtype = "High Card";
-            this.strength[0] = 1;
-            this.strength[1] = matches[1];
-            this.strength[2] = matches[2];
-            this.strength[3] = matches[3];
-            this.strength[4] = matches[4];
-            this.strength[5] = matches[5];
-            break;
-        case 2:
-         //   this.handType = "Pair";
-            this.strength[0] = 2;
-            this.strength[1] = matches[1];
-            this.strength[2] = matches[2];
-            this.strength[3] = matches[3];
-            this.strength[4] = matches[4];
-            break;
-
-        case 3:
-         //   this.handType = "Double Pair";
-            this.strength[0] = 3;
-            this.strength[1] = matches[1];
-            this.strength[2] = matches[2];
-            this.strength[3] = matches[3];
-            break;
-
-        case 4:
-          //  this.handType = "Three of a Kind";
-            this.strength[0] = 4;
-            this.strength[1] = matches[1];
-            this.strength[2] = matches[2];
-            this.strength[3] = matches[3];
-            break;
-
-        case 7:
-          //  this.handType = "Full House";
-            this.strength[0] = 7;
-            this.strength[1] = matches[1];
-            this.strength[2] = matches[2];
-            break;
-
-        case 8:
-         //   this.handType = "Four of a Kind";
-            this.strength[0] = 8;
-            this.strength[1] = matches[1];
-            this.strength[2] = matches[2];
-            break;
-
+    strength = matches.handType;
+    strength *= STRENGTH_CONSTANT;
+    for (i = 0; i < matches.cards.length; i++) {
+        strength += matches.cards[i];
+        strength *= STRENGTH_CONSTANT;
     }
 
-}
-
-/*
-  Sorts the ranks of the given cards in descending order and returns them.
- */
-
-function sortHand(cards) {
-    var temp, i, j;
-
-    for (i = 1; i < cards.length; i++) {
-        temp = cards[i];
-        for (j = i; j > 0; j--) {
-            if (temp.num > cards[j - 1].num) {
-                cards[j] = cards[j - 1];
-                cards[j - 1] = temp;
-            }
-        }
-    }
-    return cards;
+    return strength;
 
 }
-
 
 /*
    Checks for Flush in given cards.
    If there is a flush, returns the flush cards, else returns empty array.
  */
 function checkFlush (cards) {
-    var curSuit,
-        curCount,
-        flushCards = [], //cards of the same suit of flush
-        i,
-        j,
-        c;
+    var curSuit, curCount, flushCards = []; //cards of the same suit of flush
 
     /*
        Checks if the first 3 cards in the hand have the same suit as
        4 other cards.
      */
-    for (i = 0; i < 3; i++) {
+    for (var i = 0; i < 3; i++) {
         curCount = 1;
         curSuit = cards[i].suit;
-        for (j = i + 1; j < cards.length; j++) {
-            if (curSuit == cards[j].suit) {
+        for (var j = i + 1; j < cards.length; j++) {
+            if (curSuit === cards[j].suit) {
                 curCount ++;
             }
             if (curCount >= 5) {
-                for (c = 0; c < cards.length; c++) {
-                    if (cards[c].suit == curSuit) {
-                        flushCards.push(cards[c].num);
+                for (var c = 0; c < cards.length; c++) {
+                    if (cards[c].suit === curSuit) {
+                        flushCards.push(cards[c].rank);
                     }
                 }
                 return flushCards;
@@ -289,16 +286,15 @@ function checkFlush (cards) {
 
 /*
    Checks for straight in given cards.
-   If straight exists it returns the highest number of the straight, it returns 0 otherwise.
+   If straight exists it returns the highest rankber of the straight, it returns 0 otherwise.
 
  */
 function checkStraight(numbers) {
 
     // Add aces to beginning of array.
-    if (numbers[0] == 14) {
+    if (numbers[0] === 14) {
         numbers = numbers.concat([1]);
     }
-
 
     var straight,
         j;
@@ -306,11 +302,11 @@ function checkStraight(numbers) {
         straight = true;
         j = i;
         while (straight && j < numbers.length - 1) {
-            if (numbers[j] - 1 != numbers[j + 1] && numbers[j] != numbers[j + 1]) {
+            if (numbers[j] - 1 !== numbers[j + 1] && numbers[j] !== numbers[j + 1]) {
                 straight = false;
             }
 
-            if (straight && (numbers[i] - numbers[j + 1] == 4)) {
+            if (straight && (numbers[i] - numbers[j + 1] === 4)) {
                 return numbers[i];
             }
 
@@ -322,27 +318,32 @@ function checkStraight(numbers) {
 
 /*
    Checks for multiples of the same rank.
-   Returns the power of the hand and the number of the matching ranks.
+   Returns the power of the hand and the rankber of the matching ranks.
  */
 function checkMatches (cards) {
 
-    var count = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], removed, i, toBeRemoved;
+    var count = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-
+    /*
+       Adds each card rank to its index in an array.
+     */
     for (i = 0; i < cards.length; i++) {
         count[cards[i]]++;
     }
 
-    i = 0;
-    removed = 0;
-    toBeRemoved = 1;
+    /*
+       Removes the two lowest cards in the lowest index values to bring the total to 5.
+     */
+    var i = 0,
+    removed = 0, // Amount of cards current removed.
+    indexCount = 1; // Index value of the removed cards, increases by 1 through each array traversal.
     while (removed < 2) {
         if (i >= count.length) {
             i = 0;
-            toBeRemoved ++;
+            indexCount++;
         }
 
-        if (count[i] == toBeRemoved) {
+        if (count[i] === indexCount) {
             count[i] --;
             removed ++;
         }
@@ -350,7 +351,8 @@ function checkMatches (cards) {
     }
 
     var max = 0, maxNumber = 0, secondMax = 0, secondMaxNumber = 0,
-        ones = [1, 0, 0, 0, 0, 0], onesIndex = 1;
+        onesIndexes = [0, 0, 0, 0, 0, 0], // Holds the indexes where 1's are located.
+        currentOnesIndex = 0; // Current index being filled in onesIndex.
 
 
     for (i = count.length - 1; i >= 0; i--) {
@@ -364,203 +366,109 @@ function checkMatches (cards) {
             secondMaxNumber = i;
         }
 
-        if (count[i] == 1) {
-            ones[onesIndex] = i;
-            onesIndex ++;
+        if (count[i] === 1) {
+            onesIndexes[currentOnesIndex] = i;
+            currentOnesIndex ++;
         }
     }
-
 
     switch(max) {
         case 1:
-            return ones;
+            return {
+                handType: HandType.HighCard,
+                cards: onesIndexes
+            };
             break;
         case 2:
-            if (secondMax == 1) {
-                return [2, maxNumber, ones[1], ones[2], ones[3], ones[4]];
+            if (secondMax === 1) {
+                return {
+                    handType: HandType.Pair,
+                    cards: [maxNumber, maxNumber].concat(onesIndexes)
+                }
             } else {
-                return [3, maxNumber, secondMaxNumber, ones[1], ones[2], ones[3]];
+                return {
+                    handType: HandType.TwoPair,
+                    cards: [maxNumber, maxNumber, secondMaxNumber, secondMaxNumber, onesIndexes[0]]
+                };
             }
             break;
         case 3:
-            if (secondMax == 1) {
-                return [4, maxNumber, ones[1], ones[2]];
+            if (secondMax === 1) {
+                return {
+                    handType: HandType.Triple,
+                    cards: [maxNumber, maxNumber, maxNumber, onesIndexes[0], onesIndexes[1]]
+                }
             } else {
-                return [7, maxNumber, secondMaxNumber];
+                return {
+                    handType: HandType.FullHouse,
+                    cards: [maxNumber, maxNumber, maxNumber, secondMaxNumber, secondMaxNumber]
+                };
             }
             break;
         case 4:
-            return [8, maxNumber, secondMaxNumber];
-        break;
+            return {
+                handType: HandType.Quad,
+                cards: [maxNumber, maxNumber, maxNumber, maxNumber, onesIndexes[0]]
+            };
+            break;
     }
-}
-
-
-/*
-   Returns more powerful hand, returns 0 if hands are equal strength.
- */
-function checkHand (handStrength1, handStrength2) {
-    var strength1 = handStrength1.strength, strength2 = handStrength2.strength;
-    for (var i = 0; i < strength1.length; i ++) {
-        if (strength1[i] > strength2[i]) {
-            return 1;
-        } else if (strength1[i] < strength2[i]) {
-            return 2;
-        }
-    }
-    return 0;
 }
 
 /*
    Calculates the win and tie rates for each player
    Interacts directly with players winRate and tieRate attributes.
  */
-function calculateWinPercentages (rounds) {
-        var round, //current round being simulated
-        r,
-        curPlayer, // player whose cards are currently being checked
-        curComp = [],
-        winningPlayers, // array of currently winning players
-        strengthOutcome; // outcome of calculateStrength function calls
-    
-    // simulates ROUNDS rounds of show downs
-    for (round = 0; round < rounds; round ++) {
+function getOddsPerPlayer(board, iterations) {
 
-        // generates random cards for each player that needs it
-        for (r = 1; r <= CURRENT_PLAYERS; r++) {
-            curPlayer = players['player' + r];
-            curPlayer.randomCard1 = createRandomCard(curPlayer.card1);
-            curPlayer.randomCard2 = createRandomCard(curPlayer.card2);
+    var playerCardsCopy = [],
+        currentCard = undefined,
+        i, j;
+
+    for (i = 0; i < board.players.length; i++) {
+        playerCardsCopy.push([]);
+        for (j = 0; j < board.players[i].hand.cards.length; j++) {
+            currentCard = board.players[i].hand.cards[j];
+            playerCardsCopy[i].push({rank: currentCard.rank, suit: currentCard.suit});
         }
+    }
 
-        // generates random community cards
-        for (r = 1; r <= 5; r++) {
-            community["randomCard" + r] = createRandomCard(community["card" + r]);
-        }
+    var communityCardsCopy = [];
+    for (i = 0; i < board.communityCards.length; i++) {
+        currentCard = board.communityCards[i];
+        communityCardsCopy.push({rank: currentCard.rank, suit: currentCard.suit});
+    }
 
-        // calculate initial players hand strength
-        curPlayer = players['player1'];
-        curComp = [curPlayer.randomCard1, curPlayer.randomCard2, community.randomCard1, community.randomCard2,
-            community.randomCard3, community.randomCard4, community.randomCard5];
+    var winningPlayers = [],
+        results = [];
 
-        curPlayer.handStrength = new HandStrength(curComp);
+    for (i = 0; i < board.players.length; i++) {
+        results.push({wins: 0, ties: 0});
+    }
 
-        winningPlayers = [players['player' + 1]]; // add player to winners
+    for (var iteration = 0; iteration < iterations; iteration++) {
+        board.randomizeUnknownCards();
+        board.setPlayerStrengths();
+        winningPlayers = board.getHighestStrengthPlayerIds();
 
-        // loops through each player to find player with best hand
-        for (r = 2; r <= CURRENT_PLAYERS; r++) {
-            curPlayer = players['player' + r];
-            curComp = [curPlayer.randomCard1, curPlayer.randomCard2, community.randomCard1, community.randomCard2,
-                community.randomCard3, community.randomCard4, community.randomCard5];
-            curPlayer.handStrength = new HandStrength(curComp);
-            strengthOutcome = checkHand(winningPlayers[0].handStrength, curPlayer.handStrength);
-
-            if (strengthOutcome == 2) {
-                winningPlayers = [curPlayer];
-            } else if (strengthOutcome == 0) {
-                winningPlayers.push(curPlayer);
-            }
-        }
-
-        // add wins or ties to players with best hands
-        if (winningPlayers.length == 1) {
-            winningPlayers[0].winRate ++;
+        if (winningPlayers.length === 1) {
+            results[winningPlayers[0]].wins++;
         } else {
-            for (r = 0; r < winningPlayers.length; r++) {
-                winningPlayers[r].tieRate ++;
+            for (i = 0; i < winningPlayers.length; i++) {
+                results[winningPlayers[i]].ties ++;
             }
         }
-        removeRandomCards();
-        
-    }
-    
-}
 
+        board.resetCardsInPlay();
 
-/*
-   Creates a random card, with the same attributes as card.
- */
-function createRandomCard (card) {
-    var randomCard = new Card(card.num, card.suit),
-        cardFound = false,
-        rankKeys, suitKeys;
-
-    if (randomCard.num == ranks.random && randomCard.suit == suits.random) {
-        rankKeys = Object.keys(ranks);
-        suitKeys = Object.keys(suits);
-        while (!cardFound) {
-            randomCard.num = ranks[rankKeys[Math.floor(13 * Math.random())]];
-            randomCard.suit = suits[suitKeys[Math.floor(4 * Math.random())]];
-
-            if (!cardsInPlay[randomCard.num + randomCard.suit] &&
-                cardsInPlayCount[randomCard.num] < 4 && cardsInPlayCount[randomCard.suit] < 13) {
-                cardsInPlay[randomCard.num + randomCard.suit] = true;
-                randomCardsInPlay[randomCard.num + randomCard.suit] = true;
-                cardFound = true;
-                cardsInPlayCount[randomCard.num] ++;
-                if (randomCard.num in tempAdditions) {
-                    tempAdditions[randomCard.num] ++;
-                } else {
-                    tempAdditions[randomCard.num] = 1;
-                }
-                cardsInPlayCount[randomCard.suit] ++;
-                if (randomCard.suit in tempAdditions) {
-                    tempAdditions[randomCard.suit] ++;
-                } else {
-                    tempAdditions[randomCard.suit] = 1;
-                }
+        for (i = 0; i < board.players.length; i++) {
+            for (j = 0; j < board.players[i].hand.cards.length; j++) {
+                board.setPlayerCard(i, j, playerCardsCopy[i].rank, playerCardsCopy[i][j].suit);
             }
         }
-    } else if (randomCard.num == ranks.random) {
-        rankKeys = Object.keys(ranks);
-        while (!cardFound) {
-
-            randomCard.num = ranks[rankKeys[Math.floor(13 * Math.random())]];
-
-            if (!cardsInPlay[randomCard.num + randomCard.suit] && cardsInPlayCount[randomCard.num] < 4) {
-                cardsInPlay[randomCard.num + randomCard.suit] = true;
-                randomCardsInPlay[randomCard.num + randomCard.suit] = true;
-                cardFound = true;
-                cardsInPlayCount[randomCard.num] ++;
-                if (randomCard.num in tempAdditions) {
-                    tempAdditions[randomCard.num] ++;
-                } else {
-                    tempAdditions[randomCard.num] = 1;
-                }
-            }
-        }
-    } else if (randomCard.suit == suits.random) {
-        suitKeys = Object.keys(suits);
-        while (!cardFound) {
-            randomCard.suit = suits[suitKeys[Math.floor(4 * Math.random())]];
-            if (!cardsInPlay[randomCard.num + randomCard.suit]  && cardsInPlayCount[randomCard.suit] < 13) {
-                cardsInPlay[randomCard.num + randomCard.suit] = true;
-                randomCardsInPlay[randomCard.num + randomCard.suit] = true;
-                cardFound = true;
-                cardsInPlayCount[randomCard.suit] ++;
-                if (randomCard.suit in tempAdditions) {
-                    tempAdditions[randomCard.suit] ++;
-                } else {
-                    tempAdditions[randomCard.suit] = 1;
-                }
-            }
+        for (i = 0; i < communityCardsCopy.length; i++) {
+            board.setCommunityCard(i, communityCardsCopy[i].rank, communityCardsCopy[i].suit)
         }
     }
 
-    return randomCard;
-}
-
-/*
-   Removes all random cards.
- */
-function removeRandomCards() {
-    for (var card in randomCardsInPlay) {
-        cardsInPlay[card] = false;
-    }
-    randomCardsInPlay = {};
-
-    for (var key in tempAdditions) {
-        cardsInPlayCount[key] -= tempAdditions[key];
-    }
-    tempAdditions = {};
+    return results;
 }
