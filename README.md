@@ -1,3 +1,3 @@
-Poker hand calculating wesbite
+Poker hand calculating website
 
 showdownodds.com
