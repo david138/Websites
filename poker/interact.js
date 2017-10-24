@@ -146,7 +146,6 @@ $(document).ready(function() {
                  j++;
              });
          }
-
          j = 0;
          $('.game-board').find('.card').each(function () {
              board.setCommunityCard(j, convertSymbol($(this).find('.rank').first().text()),
@@ -183,13 +182,13 @@ $(document).ready(function() {
        visual representation.
      */
     function convertSymbol(symbol) {
-        if (symbol === "11") {
+        if (symbol === 11) {
             return "J";
-        } else if (symbol === "12") {
+        } else if (symbol === 12) {
             return "Q";
-        } else if (symbol === "13") {
+        } else if (symbol === 13) {
             return "K";
-        } else if (symbol === "14") {
+        } else if (symbol === 14) {
             return "A";
         } else if (symbol === "J") {
             return "11";

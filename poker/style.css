@@ -472,7 +472,6 @@ input {
 }
 
 .suits > p:last-child {
-    font-size: 20px;
     padding: 16px 0;
 }
 
